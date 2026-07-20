@@ -1,0 +1,32 @@
+﻿CO_GRUPO,MUNICIPIO_INFORMADO,MODALIDADE_INFORMADA,CONCEITO_INFORMADO,MUNICIPIO_CHAVE,MODALIDADE_CHAVE,CO_CURSO,MUNICIPIO,MODALIDADE,CONCEITO_ENADE,SITUACAO_CONCEITO,AREA,STATUS_VALIDACAO,CONCEITO_ENCONTRADO_NORMALIZADO,CONCEITO_INFORMADO_NORMALIZADO,CORRECAO_RECOMENDADA
+702,Abaetetuba,Presencial,1,ABAETETUBA,PRESENCIAL,114853,Abaetetuba,Presencial,1,Conceito 1,Matemática,Validado,1,1,Nenhuma
+702,Belém,EaD,1,BELEM,EAD,86396,Belém,EaD,1,Conceito 1,Matemática,Validado,1,1,Nenhuma
+702,Belém,Presencial,3,BELEM,PRESENCIAL,11999,Belém,Presencial,3,Conceito superior a 1,Matemática,Validado,3,3,Nenhuma
+702,Bragança,Presencial,1,BRAGANCA,PRESENCIAL,12033,Bragança,Presencial,1,Conceito 1,Matemática,Validado,1,1,Nenhuma
+702,Breves,Presencial,1,BREVES,PRESENCIAL,12044,Breves,Presencial,1,Conceito 1,Matemática,Validado,1,1,Nenhuma
+702,Cametá,Presencial,1,CAMETA,PRESENCIAL,12074,Cametá,Presencial,1,Conceito 1,Matemática,Validado,1,1,Nenhuma
+702,Castanhal,Presencial,1,CASTANHAL,PRESENCIAL,12035,Castanhal,Presencial,1,Conceito 1,Matemática,Validado,1,1,Nenhuma
+702,Salinópolis,Presencial,1,SALINOPOLIS,PRESENCIAL,1300375,Salinópolis,Presencial,1,Conceito 1,Matemática,Validado,1,1,Nenhuma
+904,Abaetetuba,Presencial,3,ABAETETUBA,PRESENCIAL,114850,Abaetetuba,Presencial,3,Conceito superior a 1,Letras-Português,Validado,3,3,Nenhuma
+904,Altamira,Presencial,2,ALTAMIRA,PRESENCIAL,114876,Altamira,Presencial,2,Conceito superior a 1,Letras-Português,Validado,2,2,Nenhuma
+904,Belém,EaD,1,BELEM,EAD,115161,Belém,EaD,1,Conceito 1,Letras-Português,Validado,1,1,Nenhuma
+904,Belém,Presencial,4,BELEM,PRESENCIAL,27645,Belém,Presencial,4,Conceito superior a 1,Letras-Português,Validado,4,4,Nenhuma
+904,Bragança,Presencial,3,BRAGANCA,PRESENCIAL,114874,Bragança,Presencial,3,Conceito superior a 1,Letras-Português,Validado,3,3,Nenhuma
+904,Breves,Presencial,3,BREVES,PRESENCIAL,115013,Breves,Presencial,3,Conceito superior a 1,Letras-Português,Validado,3,3,Nenhuma
+904,Cametá,Presencial,3,CAMETA,PRESENCIAL,114846,Cametá,Presencial,3,Conceito superior a 1,Letras-Português,Validado,3,3,Nenhuma
+904,Castanhal,Presencial,3,CASTANHAL,PRESENCIAL,114857,Castanhal,Presencial,3,Conceito superior a 1,Letras-Português,Validado,3,3,Nenhuma
+904,Soure,Presencial,sem conceito,SOURE,PRESENCIAL,,,,,,Letras-Português,Não localizado nas fontes,SEM CONCEITO,SEM CONCEITO,"Manter no cadastro como oferta informada externamente, sem CO_CURSO validado e fora dos grupos comparativos."
+1402,Abaetetuba,Presencial,1,ABAETETUBA,PRESENCIAL,92851,Abaetetuba,Presencial,1,Conceito 1,Física,Validado,1,1,Nenhuma
+1402,Ananindeua,Presencial,1,ANANINDEUA,PRESENCIAL,1330339,Ananindeua,Presencial,1,Conceito 1,Física,Validado,1,1,Nenhuma
+1402,Belém,EaD,1,BELEM,EAD,1202639,Belém,EaD,1,Conceito 1,Física,Validado,1,1,Nenhuma
+1402,Belém,Presencial,3,BELEM,PRESENCIAL,12022,Belém,Presencial,3,Conceito superior a 1,Física,Validado,3,3,Nenhuma
+1402,Salinópolis,Presencial,1,SALINOPOLIS,PRESENCIAL,1364837,Salinópolis,Presencial,1,Conceito 1,Física,Validado,1,1,Nenhuma
+1402,Tucuruí,Presencial,sem conceito,TUCURUI,PRESENCIAL,,,,,,Física,Não localizado nas fontes,SEM CONCEITO,SEM CONCEITO,"Manter no cadastro como oferta informada externamente, sem CO_CURSO validado e fora dos grupos comparativos."
+1502,Ananindeua,Presencial,5,ANANINDEUA,PRESENCIAL,1330344,Ananindeua,Presencial,5,Conceito superior a 1,Química,Validado,5,5,Nenhuma
+1502,Belém,EaD,1,BELEM,EAD,114892,Belém,EaD,1,Conceito 1,Química,Validado,1,1,Nenhuma
+1502,Belém,Presencial,4,BELEM,PRESENCIAL,12026,Belém,Presencial,4,Conceito superior a 1,Química,Validado,4,4,Nenhuma
+6407,Altamira,Presencial,1,ALTAMIRA,PRESENCIAL,114877,Altamira,Presencial,1,Conceito 1,Letras-Inglês,Validado,1,1,Nenhuma
+6407,Belém,Presencial,3,BELEM,PRESENCIAL,23777,Belém,Presencial,3,Conceito superior a 1,Letras-Inglês,Validado,3,3,Nenhuma
+6407,Bragança,Presencial,1,BRAGANCA,PRESENCIAL,114875,Bragança,Presencial,1,Conceito 1,Letras-Inglês,Validado,1,1,Nenhuma
+6407,Cametá,Presencial,1,CAMETA,PRESENCIAL,114847,Cametá,Presencial,1,Conceito 1,Letras-Inglês,Validado,1,1,Nenhuma
+6407,Soure,Presencial,1,SOURE,PRESENCIAL,95652,Soure,Presencial,1,Conceito 1,Letras-Inglês,Validado,1,1,Nenhuma

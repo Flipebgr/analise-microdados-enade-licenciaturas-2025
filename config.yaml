@@ -1,0 +1,62 @@
+projeto:
+  nome: "Análise de Microdados - ENADE Licenciaturas 2025"
+  ano: 2025
+
+arquivos:
+  zip_microdados: "dados_brutos/microdados_enade_licenciaturas_2025.zip"
+  conceito_enade: "dados_brutos/conceito_enade_licenciaturas.xlsx"
+  pasta_extraida: "dados_extraidos"
+
+ufpa:
+  nome_oficial: "UNIVERSIDADE FEDERAL DO PARÁ"
+  sigla: "UFPA"
+
+areas:
+  702: "Matemática"
+  904: "Letras-Português"
+  1402: "Física"
+  6407: "Letras-Inglês"
+  1502: "Química"
+
+leitura_txt:
+  separador: ";"
+  decimal: ","
+  quotechar: '"'
+  chunksize: 100000
+  encodings: ["utf-8-sig", "utf-8", "cp1252", "latin1"]
+
+saida:
+  csv_encoding: "utf-8-sig"
+
+ofertas_informadas:
+  - {co_grupo: 702, municipio: "Belém", modalidade: "Presencial", conceito: "3"}
+  - {co_grupo: 702, municipio: "Belém", modalidade: "EaD", conceito: "1"}
+  - {co_grupo: 702, municipio: "Abaetetuba", modalidade: "Presencial", conceito: "1"}
+  - {co_grupo: 702, municipio: "Bragança", modalidade: "Presencial", conceito: "1"}
+  - {co_grupo: 702, municipio: "Breves", modalidade: "Presencial", conceito: "1"}
+  - {co_grupo: 702, municipio: "Cametá", modalidade: "Presencial", conceito: "1"}
+  - {co_grupo: 702, municipio: "Castanhal", modalidade: "Presencial", conceito: "1"}
+  - {co_grupo: 702, municipio: "Salinópolis", modalidade: "Presencial", conceito: "1"}
+  - {co_grupo: 904, municipio: "Belém", modalidade: "Presencial", conceito: "4"}
+  - {co_grupo: 904, municipio: "Belém", modalidade: "EaD", conceito: "1"}
+  - {co_grupo: 904, municipio: "Abaetetuba", modalidade: "Presencial", conceito: "3"}
+  - {co_grupo: 904, municipio: "Altamira", modalidade: "Presencial", conceito: "2"}
+  - {co_grupo: 904, municipio: "Bragança", modalidade: "Presencial", conceito: "3"}
+  - {co_grupo: 904, municipio: "Breves", modalidade: "Presencial", conceito: "3"}
+  - {co_grupo: 904, municipio: "Cametá", modalidade: "Presencial", conceito: "3"}
+  - {co_grupo: 904, municipio: "Castanhal", modalidade: "Presencial", conceito: "3"}
+  - {co_grupo: 904, municipio: "Soure", modalidade: "Presencial", conceito: "sem conceito"}
+  - {co_grupo: 1402, municipio: "Belém", modalidade: "Presencial", conceito: "3"}
+  - {co_grupo: 1402, municipio: "Belém", modalidade: "EaD", conceito: "1"}
+  - {co_grupo: 1402, municipio: "Abaetetuba", modalidade: "Presencial", conceito: "1"}
+  - {co_grupo: 1402, municipio: "Ananindeua", modalidade: "Presencial", conceito: "1"}
+  - {co_grupo: 1402, municipio: "Salinópolis", modalidade: "Presencial", conceito: "1"}
+  - {co_grupo: 1402, municipio: "Tucuruí", modalidade: "Presencial", conceito: "sem conceito"}
+  - {co_grupo: 6407, municipio: "Belém", modalidade: "Presencial", conceito: "3"}
+  - {co_grupo: 6407, municipio: "Altamira", modalidade: "Presencial", conceito: "1"}
+  - {co_grupo: 6407, municipio: "Bragança", modalidade: "Presencial", conceito: "1"}
+  - {co_grupo: 6407, municipio: "Cametá", modalidade: "Presencial", conceito: "1"}
+  - {co_grupo: 6407, municipio: "Soure", modalidade: "Presencial", conceito: "1"}
+  - {co_grupo: 1502, municipio: "Belém", modalidade: "Presencial", conceito: "4"}
+  - {co_grupo: 1502, municipio: "Belém", modalidade: "EaD", conceito: "1"}
+  - {co_grupo: 1502, municipio: "Ananindeua", modalidade: "Presencial", conceito: "5"}

@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Dados brutos e extraídos
+/dados_brutos/*
+!/dados_brutos/.gitkeep
+/dados_extraidos/*
+!/dados_extraidos/.gitkeep
+/dados_intermediarios/*
+!/dados_intermediarios/.gitkeep
+
+# Saídas regeneráveis grandes
+*.parquet
+*.feather
+
+# Logs locais
+/logs/*.log
+
+# Sistema/Office
+.DS_Store
+Thumbs.db
+~$*
