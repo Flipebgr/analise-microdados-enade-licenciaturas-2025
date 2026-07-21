@@ -1,21 +1,21 @@
-# Análise de Microdados - ENADE Licenciaturas 2025
+# Análise de Microdados — ENADE Licenciaturas 2025
 
-Projeto para análise das ofertas da UFPA em Matemática, Letras-Português, Física, Letras-Inglês e Química, com foco nas ofertas de Conceito Enade 1.
+Projeto reproduzível para analisar as ofertas da UFPA em Matemática, Letras–Português, Física, Letras–Inglês e Química, com foco nas ofertas de Conceito Enade 1.
 
 ## Sprint atual
 
-**Sprint 0 - Preparação, auditoria e validação das fontes.**
+**Sprint 1 — Bases agregadas e piloto de Matemática.**
 
-A sprint inventaria o pacote, valida os 28 arquivos, identifica a UFPA, cruza os cursos selecionados com a planilha de Conceito Enade e gera a tabela-mestra.
+A Sprint 0 validou as fontes, identificou a UFPA (`CO_IES=569`) e produziu a tabela-mestra. A Sprint 1 constrói bases agregadas por `CO_CURSO`, grupos comparativos exclusivos, benchmarks e o primeiro conjunto de gráficos para Matemática (`CO_GRUPO=702`).
 
 ## Requisitos
 
 - Python 3.11 ou superior;
 - VS Code;
 - Git;
-- aproximadamente 1 GB livre para ambiente, extração e produtos intermediários.
+- aproximadamente 1 GB livre.
 
-## Configuração no Windows/PowerShell
+## Instalação no Windows/PowerShell
 
 ```powershell
 python -m venv .venv
@@ -24,57 +24,65 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Copie para `dados_brutos/`:
+Coloque em `dados_brutos/`:
 
 - `microdados_enade_licenciaturas_2025.zip`;
 - `conceito_enade_licenciaturas.xlsx`.
 
-Execute:
+## Execução
+
+A Sprint 0 pode ser reproduzida com:
 
 ```powershell
 python executar_sprint_00.py
 ```
 
-Testes:
+Execute o piloto de Matemática:
 
 ```powershell
+python executar_sprint_01.py
 pytest -q
-```
-
-Qualidade:
-
-```powershell
 ruff check .
 ```
 
-## Principais saídas
+## Principais saídas da Sprint 1
 
-- `dados_processados/manifesto_arquivos.csv`;
-- `dados_processados/inventario_microdados.csv`;
-- `dados_processados/ausencias_amostra.csv`;
-- `dados_processados/tabela_mestra_ufpa.csv`;
-- `dados_processados/divergencias_ufpa.csv`;
-- `relatorios/sprint_00_relatorio_qualidade.md`;
-- `logs/sprint_00.log`.
+- `dados_processados/matematica/base_analitica_cursos.csv`;
+- agregados temáticos em `dados_processados/matematica/`;
+- benchmarks amplo e comparável;
+- `figuras/matematica/*.png`;
+- `relatorios/sprint_01_piloto_matematica.md`.
 
 ## Regra metodológica central
 
-Os 28 arquivos não podem ser unidos no nível individual. A posição da linha não identifica a mesma pessoa entre temas. O fluxo permitido é: tratamento separado, agregação por `CO_CURSO`, uma linha por curso e junção 1:1 entre tabelas agregadas.
+Os arquivos não podem ser unidos no nível individual. Cada tema é tratado e agregado separadamente por `CO_CURSO`; somente tabelas com uma linha por curso são unidas com validação `one_to_one`.
 
 ## Git/GitHub
 
-Branch sugerida:
+Branch da sprint:
 
 ```text
-sprint/00-validacao-fontes
+sprint/01-bases-agregadas-matematica
 ```
 
-Após validação local:
+Após execução e validação local:
 
 ```powershell
 git add .
-git commit -m "feat(sprint-00): implementa auditoria inicial dos microdados"
-git push -u origin sprint/00-validacao-fontes
+git commit -m "feat(sprint-01): implementa bases agregadas e piloto de matemática"
+git push -u origin sprint/01-bases-agregadas-matematica
 ```
 
-Os dados brutos não são enviados ao GitHub.
+Os dados brutos e os arquivos extraídos não são enviados ao GitHub.
+
+## Sprint 2 — validação analítica de Matemática
+
+Execute após a Sprint 1:
+
+```powershell
+python executar_sprint_02.py
+pytest -q
+ruff check .
+```
+
+A sprint audita participação, indicadores percentuais, critérios alternativos de benchmark, sensibilidade do desempenho e dimensões preliminares do processo formativo.
