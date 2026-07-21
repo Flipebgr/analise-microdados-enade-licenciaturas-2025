@@ -1,6 +1,5 @@
 from __future__ import annotations
 from pathlib import Path
-import csv
 import pandas as pd
 from src.utilitarios.leitura import detectar_encoding, ler_txt
 
