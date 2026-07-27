@@ -86,3 +86,7 @@ ruff check .
 ```
 
 A sprint audita participação, indicadores percentuais, critérios alternativos de benchmark, sensibilidade do desempenho e dimensões preliminares do processo formativo.
+
+## Sprint 3 - Relatório ABNT de Matemática
+
+Execute `python executar_sprint_03.py` após as Sprints 0, 1 e 2. O script gera DOCX, Markdown e, quando o LibreOffice está disponível, PDF em `relatorios/matematica/`.
