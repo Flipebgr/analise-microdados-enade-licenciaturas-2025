@@ -90,3 +90,38 @@ A sprint audita participação, indicadores percentuais, critérios alternativos
 ## Sprint 3 - Relatório ABNT de Matemática
 
 Execute `python executar_sprint_03.py` após as Sprints 0, 1 e 2. O script gera DOCX, Markdown e, quando o LibreOffice está disponível, PDF em `relatorios/matematica/`.
+
+## Sprint 4 — Piloto de Física
+
+A Sprint 4 adapta o pipeline para Física (`CO_GRUPO=1402`) e gera bases agregadas, benchmarks e 12 figuras. As análises preservam individualmente as cinco ofertas validadas da UFPA e incluem presença, `NT_GER`, `NT_OBJ`, `NT_DIS`, dificuldade percebida, processo formativo e recomendação do curso e da instituição.
+
+Execução:
+
+```powershell
+python executar_sprint_04.py
+pytest -q
+ruff check .
+```
+
+Saídas processadas locais: `dados_processados/fisica/`.
+Figuras versionáveis: `figuras/fisica/`.
+Relatório técnico: `relatorios/sprint_04_piloto_fisica.md`.
+
+## Sprint 5 — Validação analítica de Física
+
+A Sprint 5 audita presença e desempenho, testa critérios alternativos de benchmark, valida a leitura ecológica de dificuldade e perfil socioeconômico e produz quatro figuras revisadas.
+
+Execução:
+
+```powershell
+python executar_sprint_04.py
+python executar_sprint_05.py
+pytest -q
+ruff check .
+```
+
+Saídas principais:
+
+- `relatorios/sprint_05_validacao_fisica.md`;
+- `figuras/fisica/validada_*.png`;
+- produtos locais em `dados_processados/fisica/`.
