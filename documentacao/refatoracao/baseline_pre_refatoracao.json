@@ -1,0 +1,25 @@
+{
+  "versao": "pre-refatoracao-arquitetural",
+  "descricao": "Contratos de regressão registrados antes da criação do núcleo compartilhado.",
+  "matematica": {
+    "co_grupo": 702,
+    "total_cursos": 482,
+    "ofertas_ufpa": 8,
+    "ofertas_conceito_1_ufpa": 7
+  },
+  "fisica": {
+    "co_grupo": 1402,
+    "total_cursos": 257,
+    "ofertas_ufpa_localizadas": 5,
+    "ofertas_conceito_1_ufpa": 4,
+    "oferta_tucurui_nao_localizada": true,
+    "codigo_tucurui": 1627581,
+    "figuras_sprint_04": 13,
+    "benchmarks_sprint_05": 20
+  },
+  "restricoes_metodologicas": {
+    "unidade_principal": "CO_CURSO",
+    "join_individual_entre_arquivos": false,
+    "ausencia_conceito_equivale_conceito_1": false
+  }
+}
