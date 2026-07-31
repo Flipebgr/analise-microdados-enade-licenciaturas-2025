@@ -8,7 +8,7 @@ from src.relatorios.gerar_relatorio_regional_fisica import (
     construir_sensibilidade,
 )
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 BASE = ROOT / "dados_processados" / "fisica" / "base_analitica_cursos.csv"
 
 

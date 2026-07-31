@@ -3,7 +3,7 @@ from pathlib import Path
 from src.relatorios.gerar_relatorio_fisica import gerar_relatorio
 from src.relatorios.validar_relatorio_fisica import validar_relatorio
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def test_produtos_sprint_05_disponiveis():

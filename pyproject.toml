@@ -5,3 +5,7 @@ target-version = "py311"
 [tool.pytest.ini_options]
 pythonpath = ["."]
 testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "integration: requer bases processadas ou artefatos reais do projeto",
+]
