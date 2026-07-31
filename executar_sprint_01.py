@@ -5,20 +5,18 @@ import pandas as pd
 
 from src.configuracao.caminhos import ROOT, carregar_config, caminho_relativo, garantir_pastas
 from src.extracao.extrair_zip import extrair_e_manifestar
+from src.core.configuracao_area import MATEMATICA
+from src.matematica.agregar_matematica import juntar_um_para_um
+from src.matematica.preparar_catalogo import preparar_catalogo_matematica
+from src.matematica.validar_matematica import validar_base_matematica
 from src.utilitarios.leitura import encontrar_arquivo
 from src.utilitarios.logs import configurar_logger
-from src.utilitarios.normalizacao import normalizar_codigo
-from src.validacao.validar_planilha_conceito import carregar_conceitos
-from src.validacao.validar_agregacoes import validar_tabela_agregada
-from src.validacao.validar_grupos import validar_grupos
-from src.validacao.validar_base_analitica import validar_base_analitica
 from src.agregacao.agregar_desempenho import agregar_desempenho
 from src.agregacao.agregar_demografia import agregar_demografia
 from src.agregacao.agregar_trajetoria import agregar_trajetoria
 from src.agregacao.agregar_socioeconomico import agregar_socioeconomico
 from src.agregacao.agregar_processo_formativo import agregar_processo_formativo
 from src.agregacao.agregar_recomendacao import agregar_recomendacao
-from src.analise.definir_grupos import aplicar_grupos
 from src.analise.construir_benchmarks import construir_benchmark_comparavel
 from src.analise.estatisticas_descritivas import adicionar_posicoes, resumo_por_grupo
 from src.analise.tamanhos_efeito import contrastes_desempenho
@@ -27,50 +25,14 @@ from src.visualizacao.graficos_matematica import (
     indicadores_socio, heatmap_processo, recomendacao,
 )
 
-AREA = 702
-CO_IES_UFPA = 569
+AREA = MATEMATICA.co_grupo
+CO_IES_UFPA = MATEMATICA.co_ies_focal
 
 
 def salvar_csv(df: pd.DataFrame, path: Path, encoding: str = "utf-8-sig") -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(path, index=False, encoding=encoding)
 
-
-def numerico(serie: pd.Series) -> pd.Series:
-    return pd.to_numeric(serie.astype("string").str.replace(",", ".", regex=False), errors="coerce")
-
-
-def preparar_catalogo(extraida: Path, conceito_path: Path) -> pd.DataFrame:
-    arq1 = encontrar_arquivo(extraida, "microdados2025_arq1.txt")
-    cadastro = pd.read_csv(arq1, sep=";", dtype="string", low_memory=False)
-    for c in cadastro.columns:
-        cadastro[c] = normalizar_codigo(cadastro[c])
-    cadastro = cadastro[cadastro["CO_GRUPO"].eq(AREA)].drop_duplicates().copy()
-    chaves_curso = ["NU_ANO", "CO_CURSO", "CO_IES", "CO_CATEGAD", "CO_ORGACAD", "CO_GRUPO", "CO_MODALIDADE", "CO_MUNIC_CURSO", "CO_UF_CURSO", "CO_REGIAO_CURSO"]
-    cadastro = cadastro[chaves_curso].drop_duplicates("CO_CURSO")
-
-    conceitos = carregar_conceitos(conceito_path)
-    conceitos = conceitos[conceitos["CO_GRUPO"].eq(AREA)].copy()
-    manter = ["CO_CURSO", "NO_IES", "SG_IES", "AREA", "MODALIDADE", "MUNICIPIO", "UF", "INSCRITOS", "PARTICIPANTES", "TOTAL_PADRAO_PROFICIENCIA", "PCT_PADRAO_PROFICIENCIA", "CONCEITO_ENADE", "SITUACAO_CONCEITO"]
-    conceitos = conceitos[manter].drop_duplicates("CO_CURSO")
-    cursos = cadastro.merge(conceitos, on="CO_CURSO", how="left", validate="one_to_one")
-    cursos["MODALIDADE"] = cursos["MODALIDADE"].fillna(cursos["CO_MODALIDADE"].map({0: "EaD", 1: "Presencial"}))
-    cursos["ROTULO_OFERTA"] = cursos.apply(lambda r: f"{r.get('MUNICIPIO') or r.get('CO_MUNIC_CURSO')} - {r.get('MODALIDADE')}", axis=1)
-    cursos["CONCEITO_ENADE_NUM"] = numerico(cursos["CONCEITO_ENADE"])
-    cursos["INSCRITOS_NUM"] = numerico(cursos["INSCRITOS"])
-    cursos["PARTICIPANTES_NUM"] = numerico(cursos["PARTICIPANTES"])
-    cursos["PCT_PADRAO_PROFICIENCIA_NUM"] = numerico(cursos["PCT_PADRAO_PROFICIENCIA"])
-    cursos = aplicar_grupos(cursos, CO_IES_UFPA)
-    validar_grupos(cursos)
-    return cursos
-
-
-def juntar_um_para_um(base: pd.DataFrame, partes: list[tuple[str, pd.DataFrame]]) -> pd.DataFrame:
-    out = base.copy()
-    for nome, parte in partes:
-        validar_tabela_agregada(parte, nome)
-        out = out.merge(parte, on="CO_CURSO", how="left", validate="one_to_one")
-    return out
 
 
 def gerar_relatorio(base: pd.DataFrame, grupos: pd.DataFrame, efeitos: pd.DataFrame, benchmark_resumo: pd.DataFrame, diagnostico: pd.DataFrame, path: Path) -> None:
@@ -151,7 +113,7 @@ def main() -> int:
 
     pasta_dados = encontrar_arquivo(extraida, "microdados2025_arq1.txt").parent
     logger.info("Preparando catálogo nacional de Matemática")
-    cursos = preparar_catalogo(extraida, conceito_path)
+    cursos = preparar_catalogo_matematica(extraida, conceito_path)
     codigos = cursos["CO_CURSO"].astype(int).tolist()
 
     logger.info("Agregando desempenho")
@@ -172,7 +134,7 @@ def main() -> int:
         ("socioeconomico", socio), ("processo_formativo", processo), ("recomendacao", recomend),
     ])
     base = adicionar_posicoes(base)
-    validar_base_analitica(base)
+    validar_base_matematica(base)
 
     comparaveis, resumo_comparaveis = construir_benchmark_comparavel(base)
     indicadores_resumo = ["nt_ger_mean", "nt_obj_mean", "nt_dis_mean", "taxa_presenca_microdados", "renda_ate_3sm_pct", "trabalha_pct", "acao_afirmativa_pct", "auxilio_permanencia_pct", "qe_i68_media", "qe_i69_media"]
