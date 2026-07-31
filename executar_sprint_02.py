@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import pandas as pd
 
-from executar_sprint_01 import preparar_catalogo
+from src.matematica.preparar_catalogo import preparar_catalogo_matematica
 from src.agregacao.comum import carregar_filtrado, converter_numerico
 from src.configuracao.caminhos import ROOT, carregar_config, caminho_relativo, garantir_pastas
 from src.extracao.extrair_zip import extrair_e_manifestar
@@ -90,7 +90,7 @@ def main() -> int:
     logger.info("Carregando produtos da Sprint 1")
     base = carregar_base_sprint1()
     # Revalida o catálogo diretamente nas fontes para detectar divergências estruturais.
-    catalogo = preparar_catalogo(extraida, conceito_path)
+    catalogo = preparar_catalogo_matematica(extraida, conceito_path)
     if set(base["CO_CURSO"]) != set(catalogo["CO_CURSO"]):
         raise ValueError("A base da Sprint 1 não corresponde ao catálogo atual de Matemática.")
 
