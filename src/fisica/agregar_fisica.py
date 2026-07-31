@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+
 import pandas as pd
 
 from src.agregacao.agregar_demografia import agregar_demografia
@@ -9,18 +10,27 @@ from src.agregacao.agregar_processo_formativo import agregar_processo_formativo
 from src.agregacao.agregar_recomendacao import agregar_recomendacao
 from src.agregacao.agregar_socioeconomico import agregar_socioeconomico
 from src.agregacao.agregar_trajetoria import agregar_trajetoria
+from src.core.juncoes import juntar_por_curso
 from src.validacao.validar_agregacoes import validar_tabela_agregada
 
 
-def juntar_um_para_um(base: pd.DataFrame, partes: list[tuple[str, pd.DataFrame]]) -> pd.DataFrame:
-    out = base.copy()
+def juntar_um_para_um(
+    base: pd.DataFrame,
+    partes: list[tuple[str, pd.DataFrame]],
+) -> pd.DataFrame:
+    """Compatibilidade do pipeline de Física com o contrato central de junção."""
+
+    resultado = base.copy(deep=True)
     for nome, parte in partes:
         validar_tabela_agregada(parte, nome)
-        out = out.merge(parte, on="CO_CURSO", how="left", validate="one_to_one")
-    return out
+        resultado = juntar_por_curso(resultado, parte)
+    return resultado
 
 
-def agregar_temas_fisica(pasta_dados: Path, cursos: list[int]) -> dict[str, pd.DataFrame]:
+def agregar_temas_fisica(
+    pasta_dados: Path,
+    cursos: list[int],
+) -> dict[str, pd.DataFrame]:
     desempenho, desempenho_individual = agregar_desempenho(
         pasta_dados / "microdados2025_arq3.txt", cursos
     )
@@ -32,7 +42,9 @@ def agregar_temas_fisica(pasta_dados: Path, cursos: list[int]) -> dict[str, pd.D
     trajetoria, distribuicao_turno = agregar_trajetoria(
         pasta_dados / "microdados2025_arq2.txt", cursos
     )
-    socio, distribuicao_socio, regras_socio = agregar_socioeconomico(pasta_dados, cursos)
+    socio, distribuicao_socio, regras_socio = agregar_socioeconomico(
+        pasta_dados, cursos
+    )
     processo, itens_processo, diagnostico_processo = agregar_processo_formativo(
         pasta_dados / "microdados2025_arq4.txt", cursos
     )
