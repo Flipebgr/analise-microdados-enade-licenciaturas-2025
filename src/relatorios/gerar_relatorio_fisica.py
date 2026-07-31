@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import shutil
-import subprocess
 from datetime import datetime
 from pathlib import Path
 
@@ -10,6 +8,7 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Pt
 
+from src.relatorios.conversao_pdf import converter_docx_para_pdf
 from src.relatorios.figuras_relatorio import adicionar_figura
 from src.relatorios.formatacao_abnt import configurar_cabecalho_rodape, configurar_documento, nova_secao
 from src.relatorios.gerar_apendices_fisica import exportar_apendices
@@ -34,6 +33,7 @@ from src.relatorios.gerar_texto_fisica import (
     tucurui_texto,
 )
 from src.relatorios.referencias import adicionar_referencias
+from src.relatorios.resultado_relatorio import ResultadoRelatorio
 from src.relatorios.tabelas_relatorio import adicionar_tabela
 from src.relatorios.validar_relatorio_fisica import validar_relatorio
 
@@ -447,16 +447,9 @@ def gerar_relatorio(
     doc.save(saida_docx)
     validar_relatorio(saida_docx, saida_md)
 
-    pdf: Path | None = None
-    libreoffice = shutil.which("libreoffice") or shutil.which("soffice")
-    if libreoffice:
-        subprocess.run(
-            [libreoffice, "--headless", "--convert-to", "pdf", "--outdir", str(saida_docx.parent), str(saida_docx)],
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-        candidato = saida_docx.with_suffix(".pdf")
-        if candidato.exists() and candidato.stat().st_size > 0:
-            pdf = candidato
-    return {"docx": saida_docx, "markdown": saida_md, "pdf": pdf}
+    conversao_pdf = converter_docx_para_pdf(saida_docx, saida_docx.parent)
+    return ResultadoRelatorio(
+        docx=saida_docx,
+        markdown=saida_md,
+        conversao_pdf=conversao_pdf,
+    ).como_dict()

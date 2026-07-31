@@ -1,22 +1,12 @@
 from __future__ import annotations
 
-import shutil
-import subprocess
-from pathlib import Path
-
 from src.configuracao.caminhos import ROOT
+from src.relatorios.conversao_pdf import converter_docx_para_pdf
 from src.relatorios.gerar_relatorio_matematica import gerar_relatorio
+from src.relatorios.utilitarios_relatorio import registrar_resultado_pdf
 from src.relatorios.validar_relatorio import validar_docx
 from src.utilitarios.logs import configurar_logger
 
-
-def converter_pdf(docx: Path, destino: Path, logger) -> None:
-    exe = shutil.which("libreoffice") or shutil.which("soffice")
-    if not exe:
-        logger.warning("LibreOffice não localizado; PDF não foi gerado. O DOCX permanece disponível.")
-        return
-    destino.mkdir(parents=True, exist_ok=True)
-    subprocess.run([exe, "--headless", "--convert-to", "pdf", "--outdir", str(destino), str(docx)], check=True)
 
 
 def main() -> int:
@@ -31,7 +21,8 @@ def main() -> int:
         for erro in erros:
             logger.error(erro)
         return 1
-    converter_pdf(docx, saida, logger)
+    resultado_pdf = converter_docx_para_pdf(docx, saida)
+    registrar_resultado_pdf(logger, resultado_pdf)
     logger.info("Sprint 3 concluída: DOCX, Markdown e PDF (quando LibreOffice disponível)")
     return 0
 

@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 
 from src.relatorios.gerar_relatorio_fisica import gerar_relatorio
+from src.relatorios.utilitarios_relatorio import registrar_resultado_pdf
 
 ROOT = Path(__file__).resolve().parent
 
@@ -19,10 +20,7 @@ def main() -> int:
     )
     logger.info("DOCX gerado: %s", saidas["docx"])
     logger.info("Markdown gerado: %s", saidas["markdown"])
-    if saidas["pdf"]:
-        logger.info("PDF gerado: %s", saidas["pdf"])
-    else:
-        logger.warning("PDF não gerado automaticamente; LibreOffice não localizado")
+    registrar_resultado_pdf(logger, saidas["conversao_pdf"])
     logger.info("Sprint 6 concluída")
     return 0
 
