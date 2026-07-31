@@ -6,7 +6,7 @@ from src.fisica.validar_desempenho import auditar_desempenho
 from src.fisica.validar_presenca import auditar_presenca
 from src.fisica.validar_resultados_fisica import validar_resultados
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 PASTA = ROOT / "dados_processados" / "fisica"
 
 
