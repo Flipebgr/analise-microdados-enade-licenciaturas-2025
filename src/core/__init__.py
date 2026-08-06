@@ -3,6 +3,7 @@
 from src.core.catalogo import preparar_catalogo_area
 from src.core.configuracao_area import (
     AREAS,
+    BIOLOGIA,
     FISICA,
     INGLES,
     MATEMATICA,
@@ -16,6 +17,7 @@ from src.core.validacao import ResultadoValidacao, validar_base_area
 
 __all__ = [
     "AREAS",
+    "BIOLOGIA",
     "FISICA",
     "INGLES",
     "MATEMATICA",
