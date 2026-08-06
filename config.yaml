@@ -17,6 +17,7 @@ areas:
   1402: "Física"
   6407: "Letras-Inglês"
   1502: "Química"
+  1602: "Ciências Biológicas"
 
 leitura_txt:
   separador: ";"
@@ -60,3 +61,8 @@ ofertas_informadas:
   - {co_grupo: 1502, municipio: "Belém", modalidade: "Presencial", conceito: "4"}
   - {co_grupo: 1502, municipio: "Belém", modalidade: "EaD", conceito: "1"}
   - {co_grupo: 1502, municipio: "Ananindeua", modalidade: "Presencial", conceito: "5"}
+  - {co_grupo: 1602, municipio: "Belém", modalidade: "Presencial", conceito: "4"}
+  - {co_grupo: 1602, municipio: "Bragança", modalidade: "Presencial", conceito: "4"}
+  - {co_grupo: 1602, municipio: "Altamira", modalidade: "Presencial", conceito: "4"}
+  - {co_grupo: 1602, municipio: "Soure", modalidade: "Presencial", conceito: "3"}
+  - {co_grupo: 1602, municipio: "Belém", modalidade: "EaD", conceito: "3"}

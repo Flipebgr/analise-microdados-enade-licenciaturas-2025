@@ -35,11 +35,12 @@ MATEMATICA = ConfiguracaoArea("matematica", "Matemática", 702)
 PORTUGUES = ConfiguracaoArea("portugues", "Letras–Português", 904)
 FISICA = ConfiguracaoArea("fisica", "Física", 1402)
 QUIMICA = ConfiguracaoArea("quimica", "Química", 1502)
+BIOLOGIA = ConfiguracaoArea("biologia", "Ciências Biológicas", 1602)
 INGLES = ConfiguracaoArea("ingles", "Letras–Inglês", 6407)
 
 AREAS: dict[str, ConfiguracaoArea] = {
     area.slug: area
-    for area in (MATEMATICA, PORTUGUES, FISICA, QUIMICA, INGLES)
+    for area in (MATEMATICA, PORTUGUES, FISICA, QUIMICA, BIOLOGIA, INGLES)
 }
 
 
