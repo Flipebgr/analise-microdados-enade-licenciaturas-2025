@@ -19,6 +19,7 @@ areas:
   1502: "Química"
   1602: "Ciências Biológicas"
   2001: "Pedagogia"
+  3002: "Geografia"
 
 leitura_txt:
   separador: ";"
