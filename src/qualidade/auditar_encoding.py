@@ -35,7 +35,8 @@ PASTAS_IGNORADAS = {
 ARQUIVOS_IGNORADOS = {
     Path("src/qualidade/auditar_encoding.py"),
     Path("tests/test_refactor_01.py"),
-    Path("documentacao/refatoracao/resultado_auditoria_encoding.json"),
+    # Este teste contém strings de mojibake propositalmente como fixtures.
+    Path("tests/unit/test_encoding.py"),
 }
 
 # Sequências típicas de texto UTF-8 interpretado incorretamente como Windows-1252.
@@ -171,7 +172,7 @@ def construir_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--relatorio",
         type=Path,
-        default=Path("documentacao/refatoracao/resultado_auditoria_encoding.json"),
+        default=Path("dados_processados/qualidade/resultado_auditoria_encoding.json"),
     )
     return parser
 

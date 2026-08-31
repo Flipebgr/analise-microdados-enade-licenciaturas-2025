@@ -28,7 +28,7 @@ A auditoria histórica de encoding levou à adoção de:
 - leitura com encodings conhecidos quando necessário;
 - saída CSV preferencialmente em `utf-8-sig`.
 
-O artefato `documentacao/refatoracao/resultado_auditoria_encoding.json` pode continuar enquanto o mecanismo histórico de auditoria ainda estiver preservado.
+A auditoria ignora arquivos derivados e também o próprio `tests/unit/test_encoding.py`, pois esse teste contém sequências de mojibake deliberadas usadas como fixtures. Essas ocorrências não representam defeitos de encoding do repositório.
 
 ## 4. Contratos estruturais
 
@@ -131,13 +131,22 @@ python -m pytest -q
 python -m ruff check .
 ```
 
-## 11. Baseline histórico
+## 11. Contratos históricos aposentados
 
-`documentacao/refatoracao/baseline_pre_refatoracao.json` registra contratos de regressão de Matemática e Física anteriores ao núcleo compartilhado.
+O arquivo `baseline_pre_refatoracao.json` e seu teste de integração foram úteis durante a criação do núcleo compartilhado, mas seus contratos passaram a ser cobertos por testes operacionais atuais:
 
-Enquanto `tests/integration/test_baseline_refatoracao.py` depender desse arquivo, ele deve permanecer no repositório.
+- contagens e ofertas reais de Matemática e Física são verificadas pelos testes de regressão dessas áreas;
+- unicidade por `CO_CURSO` e joins one-to-one são cobertos pelos testes do núcleo;
+- ausência de conceito diferente de Conceito 1 é protegida por testes de integridade e grupos comparativos;
+- a não inserção artificial de Tucuruí em Física é coberta por teste de regressão específico.
 
-A aposentadoria do baseline deve ocorrer somente em conjunto com a substituição do teste histórico por contratos atuais equivalentes.
+Por isso, o baseline pré-refatoração não integra mais o estado operacional do projeto.
+
+A auditoria de encoding continua disponível, mas seu relatório JSON é produto regenerável e passa a ser salvo localmente em:
+
+```text
+dados_processados/qualidade/resultado_auditoria_encoding.json
+```
 
 ## 12. Critério de merge
 

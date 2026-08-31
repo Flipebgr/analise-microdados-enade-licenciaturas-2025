@@ -131,13 +131,8 @@ Após a consolidação:
 - confiar no histórico Git para recuperação de versões antigas;
 - manter artefatos JSON ainda usados por testes ou auditorias automáticas.
 
-## Artefatos históricos ainda preservados no Git
+## Contratos históricos aposentados
 
-Enquanto houver dependência automatizada:
+Após a estabilização do núcleo compartilhado, o baseline pré-refatoração deixou de ser necessário como artefato operacional. Seus contratos permaneceram protegidos por testes correntes de núcleo e regressão por área.
 
-```text
-documentacao/refatoracao/baseline_pre_refatoracao.json
-documentacao/refatoracao/resultado_auditoria_encoding.json
-```
-
-O baseline não deve ser removido enquanto o teste de regressão correspondente permanecer ativo.
+O relatório JSON de encoding também deixou de ser documentação versionada: a auditoria permanece no código, mas seu resultado é regenerável e local.

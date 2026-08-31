@@ -32,3 +32,10 @@ def test_auditoria_ignora_pastas_derivadas(tmp_path: Path):
     pasta.mkdir(parents=True)
     (pasta / "base.csv").write_text("RelatÃ³rio\n", encoding="utf-8")
     assert auditar_encoding(tmp_path) == []
+
+def test_auditoria_ignora_fixture_mojibake_do_proprio_teste(tmp_path: Path):
+    arquivo = tmp_path / "tests" / "unit" / "test_encoding.py"
+    arquivo.parent.mkdir(parents=True)
+    arquivo.write_text("RelatÃ³rio com problema\n", encoding="utf-8")
+
+    assert auditar_encoding(tmp_path) == []
