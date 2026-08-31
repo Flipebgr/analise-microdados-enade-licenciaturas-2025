@@ -31,91 +31,66 @@ O arquivo `config.yaml` aponta para esses caminhos.
 
 As fontes brutas não devem ser versionadas.
 
-## 3. Validação inicial
+## 3. Executor unificado
 
-A validação de fontes e estrutura é executada por:
-
-```powershell
-python executar_sprint_00.py
-```
-
-Ela verifica fontes, cadastro, identificadores, relação da UFPA, tabela-mestra e integridade básica.
-
-## 4. Pipelines por área
-
-Os executores históricos continuam disponíveis enquanto não houver uma CLI unificada.
-
-### Matemática
+A interface operacional preferencial é:
 
 ```powershell
-python executar_sprint_01.py
-python executar_sprint_02.py
-python executar_sprint_03.py
+python executar.py --listar
 ```
 
-### Física
+Exemplos:
 
 ```powershell
-python executar_sprint_04.py
-python executar_sprint_05.py
-python executar_sprint_06.py
-python executar_relatorio_regional_fisica.py
+python executar.py fontes
+python executar.py matematica base
+python executar.py matematica validacao
+python executar.py matematica relatorio
+python executar.py fisica regional
+python executar.py geografia tudo
 ```
 
-### Letras–Inglês
-
-```powershell
-python executar_sprint_07.py
-python executar_sprint_08.py
-python executar_sprint_09.py
-```
-
-### Ciências Biológicas
-
-```powershell
-python executar_sprint_10.py
-python executar_sprint_11.py
-python executar_sprint_12.py
-```
-
-### Pedagogia
-
-```powershell
-python executar_sprint_13.py
-python executar_sprint_14.py
-python executar_sprint_15.py
-```
-
-### Letras–Português
-
-```powershell
-python executar_sprint_16.py
-python executar_sprint_17.py
-```
-
-O relatório final de Letras–Português deve ser executado pelo executor da Sprint 18 quando essa etapa estiver presente e sincronizada no branch atual.
-
-### Geografia
-
-```powershell
-python executar_sprint_19.py
-python executar_sprint_20.py
-python executar_sprint_21.py
-```
-
-### Química
-
-Química está registrada na configuração (`CO_GRUPO=1502`), mas deve ser retomada com um pipeline novo a partir do núcleo atual antes de qualquer resultado ser considerado validado.
-
-## 5. Ordem típica por área
+As etapas padronizadas são:
 
 ```text
-base analítica
-→ validação analítica
-→ relatório final
+base
+validacao
+relatorio
+tudo
 ```
 
-O relatório final depende dos produtos agregados e figuras gerados nas etapas anteriores.
+Física possui adicionalmente:
+
+```text
+regional
+```
+
+`tudo` executa base → validação → relatório e interrompe imediatamente se uma etapa retornar erro.
+
+## 4. Compatibilidade com executores históricos
+
+Os arquivos `executar_sprint_*.py` continuam temporariamente no repositório porque ainda contêm a orquestração concreta de cada etapa. `executar.py` funciona como uma interface única sobre esses executores.
+
+Eles não devem ser removidos até que a lógica de orquestração seja migrada para módulos reutilizáveis sob `src/`.
+
+O script `executar_sprint_07_validacao.py` não integra o pipeline analítico real de Letras–Inglês e pode ser removido; a validação efetiva da área é executada pela Sprint 08.
+
+## 5. Pipelines registrados
+
+| Área | Base | Validação | Relatório | Extra |
+|---|---:|---:|---:|---|
+| Fontes | — | Sprint 00 | — | — |
+| Matemática | 01 | 02 | 03 | — |
+| Física | 04 | 05 | 06 | regional |
+| Letras–Inglês | 07 | 08 | 09 | — |
+| Ciências Biológicas | 10 | 11 | 12 | — |
+| Pedagogia | 13 | 14 | 15 | — |
+| Letras–Português | 16 | 17 | 18 | — |
+| Geografia | 19 | 20 | 21 | — |
+
+Se o arquivo executor de uma etapa ainda não estiver integrado na branch atual, `executar.py` informa o problema e retorna código 2.
+
+Química permanece fora desse registro operacional até que seu pipeline seja reconstruído e validado a partir do núcleo compartilhado.
 
 ## 6. Testes
 

@@ -56,6 +56,27 @@ Coloque localmente em `dados_brutos/`:
 
 Essas fontes não são versionadas no Git.
 
+## Execução recomendada
+
+O ponto de entrada preferencial é o executor unificado:
+
+```powershell
+python executar.py --listar
+python executar.py matematica base
+python executar.py fisica validacao
+python executar.py geografia relatorio
+python executar.py geografia tudo
+```
+
+` tudo ` executa, em sequência, base → validação → relatório da área. O relatório regional de Física permanece uma etapa explícita:
+
+```powershell
+python executar.py fisica regional
+```
+
+Os arquivos `executar_sprint_*.py` continuam temporariamente como implementações de compatibilidade. Novos fluxos devem preferir `executar.py`.
+
+
 ## Validação
 
 Antes de qualquer merge:
