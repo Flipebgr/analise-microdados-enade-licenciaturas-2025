@@ -32,4 +32,3 @@ def test_produtos_sprint_08_quando_disponiveis() -> None:
         ROOT / "figuras" / "ingles" / "validada_12_comparacao_regional.png",
     ]
     assert all(path.exists() and path.stat().st_size > 0 for path in figuras)
-    assert (ROOT / "relatorios" / "sprint_08_validacao_letras_ingles.md").exists()

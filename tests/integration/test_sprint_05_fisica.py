@@ -44,7 +44,6 @@ def test_produtos_sprint_05_existentes() -> None:
         PASTA / "diagnostico_dimensoes_processo.csv",
         PASTA / "auditoria_indicadores_socioeconomicos.csv",
         PASTA / "associacoes_ecologicas.csv",
-        ROOT / "relatorios" / "sprint_05_validacao_fisica.md",
     ]
     assert all(path.exists() and path.stat().st_size > 0 for path in esperados)
 

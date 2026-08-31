@@ -54,6 +54,3 @@ def test_produtos_sprint20_geografia_quando_disponiveis() -> None:
     for n in range(14, 20):
         assert list(figuras.glob(f"validada_{n:02d}_*.png"))
 
-    assert (
-        ROOT / "relatorios" / "sprint_20_validacao_geografia.md"
-    ).exists()

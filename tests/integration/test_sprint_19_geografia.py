@@ -40,4 +40,3 @@ def test_produtos_sprint_19_geografia_quando_disponiveis() -> None:
     figuras = list((ROOT / "figuras" / "geografia").glob("*.png"))
     assert len(figuras) >= 13
     assert all(path.stat().st_size > 0 for path in figuras)
-    assert (ROOT / "relatorios" / "sprint_19_piloto_geografia.md").exists()

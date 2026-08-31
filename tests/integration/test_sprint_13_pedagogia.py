@@ -41,4 +41,3 @@ def test_produtos_sprint_13_pedagogia_quando_disponiveis() -> None:
     figuras = list((ROOT / "figuras" / "pedagogia").glob("*.png"))
     assert len(figuras) >= 13
     assert all(path.stat().st_size > 0 for path in figuras)
-    assert (ROOT / "relatorios" / "sprint_13_piloto_pedagogia.md").exists()

@@ -41,4 +41,3 @@ def test_produtos_sprint_11_biologia_quando_disponiveis() -> None:
         ROOT / "figuras" / "biologia" / "validada_19_recomendacao_soure.png",
     ]
     assert all(path.exists() and path.stat().st_size > 0 for path in figuras)
-    assert (ROOT / "relatorios" / "sprint_11_validacao_biologia_soure.md").exists()

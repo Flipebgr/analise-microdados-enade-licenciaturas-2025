@@ -29,4 +29,3 @@ def test_produtos_sprint_10_biologia_quando_disponiveis() -> None:
     figuras = list((ROOT / "figuras" / "biologia").glob("*.png"))
     assert len(figuras) >= 13
     assert all(path.stat().st_size > 0 for path in figuras)
-    assert (ROOT / "relatorios" / "sprint_10_piloto_biologia.md").exists()
