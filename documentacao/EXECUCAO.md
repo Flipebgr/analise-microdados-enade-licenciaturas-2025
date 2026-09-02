@@ -1,15 +1,12 @@
 # Execução e reprodução
 
-## 1. Ambiente
+## 1. Estado atual
 
-Requisitos:
+O branch operacional contém apenas a infraestrutura compartilhada e a validação das fontes. Pipelines de áreas já concluídas foram aposentados depois da entrega.
 
-- Python 3.11 ou superior;
-- Git;
-- ambiente virtual;
-- dependências de `requirements.txt`.
+A reprodução histórica de uma área encerrada deve usar o snapshot/tag criado antes da aposentadoria, e não o branch operacional atual.
 
-No Windows/PowerShell:
+## 2. Ambiente
 
 ```powershell
 python -m venv .venv
@@ -18,140 +15,70 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-## 2. Fontes locais
+## 3. Fontes locais
 
-Copie para `dados_brutos/`:
+Em `dados_brutos/`:
 
 ```text
 microdados_enade_licenciaturas_2025.zip
 conceito_enade_licenciaturas.xlsx
 ```
 
-O arquivo `config.yaml` aponta para esses caminhos.
-
-As fontes brutas não devem ser versionadas.
-
-## 3. Executor unificado
-
-A interface operacional preferencial é:
+## 4. Executor operacional
 
 ```powershell
 python executar.py --listar
 ```
 
-Exemplos:
+No estado atual:
 
 ```powershell
 python executar.py fontes
-python executar.py matematica base
-python executar.py matematica validacao
-python executar.py matematica relatorio
-python executar.py fisica regional
-python executar.py geografia tudo
 ```
 
-As etapas padronizadas são:
+Esse comando despacha para:
 
 ```text
-base
-validacao
-relatorio
-tudo
+scripts/pipelines/executar_sprint_00.py
 ```
 
-Física possui adicionalmente:
+## 5. Novas áreas
+
+Uma nova área deve nascer em branch própria a partir de `main`.
+
+Fluxo:
 
 ```text
-regional
+main
+→ feature/<area>-base
+→ implementação
+→ validação
+→ relatório
+→ apresentação/entrega
+→ merge em main
+→ arquivamento da entrega
+→ aposentadoria do código específico quando a área estiver encerrada
 ```
 
-`tudo` executa base → validação → relatório e interrompe imediatamente se uma etapa retornar erro.
-
-## 4. Compatibilidade com executores históricos
-
-Os executores históricos ficam em `scripts/pipelines/` porque ainda contêm a orquestração concreta de cada etapa. `executar.py` funciona como uma interface única sobre esses executores.
-
-Eles não devem ser removidos até que a lógica de orquestração seja migrada para módulos reutilizáveis sob `src/`.
-
-O antigo `executar_sprint_07_validacao.py` foi removido; a validação efetiva de Letras–Inglês é executada pela Sprint 08.
-
-## 5. Pipelines registrados
-
-| Área | Base | Validação | Relatório | Extra |
-|---|---:|---:|---:|---|
-| Fontes | — | Sprint 00 | — | — |
-| Matemática | 01 | 02 | 03 | — |
-| Física | 04 | 05 | 06 | regional |
-| Letras–Inglês | 07 | 08 | 09 | — |
-| Ciências Biológicas | 10 | 11 | 12 | — |
-| Pedagogia | 13 | 14 | 15 | — |
-| Letras–Português | 16 | 17 | 18 | — |
-| Geografia | 19 | 20 | 21 | — |
-
-Se o arquivo executor de uma etapa ainda não estiver integrado na branch atual, `executar.py` informa o problema e retorna código 2.
-
-Química permanece fora desse registro operacional até que seu pipeline seja reconstruído e validado a partir do núcleo compartilhado.
+O núcleo compartilhado deve ser reutilizado; módulos específicos só devem existir enquanto necessários para o trabalho da área.
 
 ## 6. Testes
 
-Rodada rápida:
-
 ```powershell
 python -m pytest -q -m "not integration"
-```
-
-Integração:
-
-```powershell
 python -m pytest -q -m integration
-```
-
-Suíte completa:
-
-```powershell
 python -m pytest -q
-```
-
-Lint:
-
-```powershell
 python -m ruff check .
 ```
 
-No Windows, prefira `python -m pytest` e `python -m ruff`.
+## 7. Reproduzir uma entrega antiga
 
-## 7. Testes ignorados
+Não reintroduza o código aposentado na `main` apenas para consulta.
 
-Um teste de integração pode aparecer como `skipped` quando a base processada ou o artefato real necessário não existe naquele computador.
+Use:
 
-Isso não equivale automaticamente a falha. Antes do merge de uma área, os produtos da área em desenvolvimento devem estar disponíveis e seus testes de integração devem executar.
+1. a entrega arquivada no Drive;
+2. o histórico Git;
+3. a tag `archive/pre-aposentadoria-areas` ou snapshot equivalente.
 
-## 8. Conversão para PDF
-
-DOCX e Markdown são produtos válidos mesmo sem LibreOffice.
-
-Quando o LibreOffice estiver disponível, o módulo compartilhado de conversão pode produzir PDF. Ausência do conversor não deve transformar automaticamente o pipeline analítico em falha.
-
-## 9. Git
-
-Fluxo recomendado:
-
-```text
-refactor/nucleo-compartilhado
-↓
-branch de sprint/refatoração
-↓
-execução
-↓
-pytest + ruff
-↓
-commit
-↓
-push
-↓
-Pull Request
-↓
-merge na branch de integração
-```
-
-Não misturar limpeza estrutural extensa com desenvolvimento analítico de uma área no mesmo commit.
+Se for necessário corrigir uma entrega histórica excepcionalmente, crie branch específica a partir do commit/tag correspondente.

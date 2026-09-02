@@ -1,11 +1,11 @@
 import pytest
 
-from src.core.configuracao_area import INGLES, ConfiguracaoArea, obter_area
+from src.core.configuracao_area import QUIMICA, ConfiguracaoArea, obter_area
 
 
-def test_configuracao_ingles():
-    assert INGLES.co_grupo == 6407
-    assert INGLES.co_ies_focal == 569
+def test_configuracao_quimica():
+    assert QUIMICA.co_grupo == 1502
+    assert QUIMICA.co_ies_focal == 569
 
 
 def test_configuracao_remove_espacos():
@@ -29,7 +29,7 @@ def test_configuracao_rejeita_codigo_invalido(valor):
 
 
 def test_obter_area_normaliza_slug():
-    assert obter_area(" INGLES ") is INGLES
+    assert obter_area(" QUIMICA ") is QUIMICA
 
 
 def test_obter_area_rejeita_slug_desconhecido():

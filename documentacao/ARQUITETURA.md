@@ -100,23 +100,33 @@ Infraestrutura compartilhada para:
 - `src/qualidade/`: inspeção e auditorias;
 - `src/utilitarios/`: leitura, normalização e logs.
 
-## 5. Módulos por área
+## 5. Ciclo de vida dos módulos por área
 
-As áreas possuem pacotes próprios quando há regras específicas:
+Pacotes específicos de áreas existem somente enquanto a área está em desenvolvimento.
+
+Depois da entrega final:
+
+- relatório e apresentação são arquivados;
+- um snapshot/tag preserva o código que gerou a entrega;
+- módulos, executores e testes exclusivos da área podem ser aposentados do branch operacional.
+
+No estado atual, as áreas Matemática, Física, Letras–Inglês, Ciências Biológicas, Pedagogia, Letras–Português e Geografia estão arquivadas. Química permanece cadastrada, mas ainda sem pipeline operacional novo.
+
+O núcleo compartilhado permanece em:
 
 ```text
-src/matematica/
-src/fisica/
-src/ingles/
-src/biologia/
-src/pedagogia/
-src/portugues/
-src/geografia/
+src/core/
+src/agregacao/
+src/analise/
+src/configuracao/
+src/extracao/
+src/qualidade/
+src/relatorios/
+src/utilitarios/
+src/validacao/
 ```
 
-Esses pacotes preservam diferenças de desenho analítico, oferta focal, benchmark, validações e figuras.
-
-A repetição entre módulos de área deve ser reduzida somente por refatoração testada. Arquivos específicos não devem ser removidos apenas por semelhança estrutural.
+A existência de configurações históricas em `src/core/configuracao_area.py` não significa que seus pipelines estejam ativos.
 
 ## 6. Camadas de produto
 

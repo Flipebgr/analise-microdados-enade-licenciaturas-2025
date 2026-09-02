@@ -1,10 +1,26 @@
 # Análise de Microdados — ENADE Licenciaturas 2025
 
-Projeto reproduzível para análise das licenciaturas da UFPA no Enade das Licenciaturas 2025, com comparação por curso (`CO_CURSO`) e benchmarks territoriais e estruturais.
+Projeto para análise técnico-científica das licenciaturas da UFPA no Enade das Licenciaturas 2025.
+
+## Estado operacional
+
+As áreas já concluídas e entregues foram aposentadas do branch operacional. O código que produziu essas entregas permanece preservado no histórico Git e no snapshot/tag criado antes da aposentadoria.
+
+Áreas encerradas:
+
+- Matemática (`CO_GRUPO=702`);
+- Física (`1402`);
+- Letras–Inglês (`6407`);
+- Ciências Biológicas (`1602`);
+- Pedagogia (`2001`);
+- Letras–Português (`904`);
+- Geografia (`3002`).
+
+Química (`1502`) permanece cadastrada, mas seu novo pipeline ainda não foi implementado. Ela deverá nascer em uma branch própria a partir do núcleo atual.
 
 ## Regra metodológica central
 
-Os arquivos temáticos dos microdados **não são unidos no nível individual**. O fluxo obrigatório é:
+Os arquivos temáticos dos microdados **não são unidos no nível individual**:
 
 ```text
 arquivo temático
@@ -16,31 +32,36 @@ arquivo temático
 → comparação entre cursos
 ```
 
-A posição da linha não é chave e não é criado identificador artificial de estudante.
+Não se usa posição de linha como chave, não se cria identificador artificial e não se realizam joins individuais entre temas diferentes.
 
-## Áreas configuradas
+## Estrutura operacional
 
-| Área | CO_GRUPO |
-|---|---:|
-| Matemática | 702 |
-| Letras–Português | 904 |
-| Física | 1402 |
-| Química | 1502 |
-| Ciências Biológicas | 1602 |
-| Pedagogia | 2001 |
-| Geografia | 3002 |
-| Letras–Inglês | 6407 |
+```text
+src/
+├── core/
+├── agregacao/
+├── analise/
+├── configuracao/
+├── extracao/
+├── qualidade/
+├── relatorios/
+├── utilitarios/
+└── validacao/
 
-A configuração de uma área no núcleo não significa que todo o pipeline analítico esteja concluído. Química deve ser retomada a partir do núcleo compartilhado e validada antes de uso analítico.
+scripts/
+└── pipelines/
+    └── executar_sprint_00.py
+
+tests/
+├── unit/
+└── integration/
+
+executar.py
+```
+
+Pacotes específicos de áreas concluídas não permanecem no branch operacional.
 
 ## Requisitos
-
-- Python 3.11 ou superior;
-- Git;
-- ambiente virtual Python;
-- fontes oficiais em `dados_brutos/`.
-
-### Instalação
 
 ```powershell
 python -m venv .venv
@@ -49,37 +70,21 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-Coloque localmente em `dados_brutos/`:
+Fontes locais esperadas em `dados_brutos/`:
 
 - `microdados_enade_licenciaturas_2025.zip`;
 - `conceito_enade_licenciaturas.xlsx`.
 
-Essas fontes não são versionadas no Git.
-
-## Execução recomendada
-
-O ponto de entrada preferencial é o executor unificado:
+## Execução
 
 ```powershell
 python executar.py --listar
-python executar.py matematica base
-python executar.py fisica validacao
-python executar.py geografia relatorio
-python executar.py geografia tudo
+python executar.py fontes
 ```
 
-` tudo ` executa, em sequência, base → validação → relatório da área. O relatório regional de Física permanece uma etapa explícita:
-
-```powershell
-python executar.py fisica regional
-```
-
-Os executores históricos ficam em `scripts/pipelines/` como implementações de compatibilidade. Novos fluxos devem preferir `executar.py`.
-
+Novas áreas são registradas em `executar.py` somente durante seu desenvolvimento operacional.
 
 ## Validação
-
-Antes de qualquer merge:
 
 ```powershell
 python -m pytest -q -m "not integration"
@@ -87,8 +92,6 @@ python -m pytest -q -m integration
 python -m pytest -q
 python -m ruff check .
 ```
-
-Testes de integração podem ser ignorados (`skipped`) quando produtos processados locais de uma área não estão disponíveis.
 
 ## Documentação
 
@@ -99,7 +102,8 @@ Testes de integração podem ser ignorados (`skipped`) quando produtos processad
 - [Qualidade e validação](documentacao/QUALIDADE_E_VALIDACAO.md)
 - [Estrutura dos relatórios](documentacao/ESTRUTURA_RELATORIOS.md)
 - [Histórico](documentacao/HISTORICO.md)
+- [Política de aposentadoria](documentacao/POLITICA_APOSENTADORIA_AREAS.md)
 
-## Política de artefatos
+## Histórico e entregas
 
-O Git deve priorizar código, testes, configuração, documentação operacional e relatórios finais em Markdown. Fontes brutas, ambientes virtuais, caches e bases processadas por área permanecem locais. DOCX, PDF, apresentações e snapshots históricos podem ser arquivados externamente.
+As entregas finais (relatório/PDF/DOCX/PPTX) são arquivadas externamente. O estado exato do código anterior à aposentadoria das áreas é preservado pela tag/snapshot de arquivamento e pelo histórico do Git.
