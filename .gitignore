@@ -33,3 +33,19 @@ Thumbs.db
 
 /dados_intermediarios/*/
 !/dados_intermediarios/.gitkeep
+
+# Relatórios binários gerados
+/relatorios/**/*.docx
+/relatorios/**/*.pdf
+
+# Relatórios intermediários de sprint (regeneráveis e arquivados externamente)
+/relatorios/sprint_*.md
+/relatorios/*/sprint_*.md
+
+# Figuras geradas pelos pipelines
+/figuras/**/*.png
+
+# Produtos derivados da Sprint 0 e demais saídas processadas
+/dados_processados/*.csv
+/dados_processados/*.xlsx
+/dados_processados/*.json

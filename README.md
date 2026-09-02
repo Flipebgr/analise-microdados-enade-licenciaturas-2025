@@ -1,127 +1,109 @@
 # Análise de Microdados — ENADE Licenciaturas 2025
 
-Projeto reproduzível para analisar as ofertas da UFPA em Matemática, Letras–Português, Física, Letras–Inglês e Química, com foco nas ofertas de Conceito Enade 1.
+Projeto para análise técnico-científica das licenciaturas da UFPA no Enade das Licenciaturas 2025.
 
-## Sprint atual
+## Estado operacional
 
-**Sprint 1 — Bases agregadas e piloto de Matemática.**
+As áreas já concluídas e entregues foram aposentadas do branch operacional. O código que produziu essas entregas permanece preservado no histórico Git e no snapshot/tag criado antes da aposentadoria.
 
-A Sprint 0 validou as fontes, identificou a UFPA (`CO_IES=569`) e produziu a tabela-mestra. A Sprint 1 constrói bases agregadas por `CO_CURSO`, grupos comparativos exclusivos, benchmarks e o primeiro conjunto de gráficos para Matemática (`CO_GRUPO=702`).
+Áreas encerradas:
+
+- Matemática (`CO_GRUPO=702`);
+- Física (`1402`);
+- Letras–Inglês (`6407`);
+- Ciências Biológicas (`1602`);
+- Pedagogia (`2001`);
+- Letras–Português (`904`);
+- Geografia (`3002`).
+
+Química (`1502`) permanece cadastrada, mas seu novo pipeline ainda não foi implementado. Ela deverá nascer em uma branch própria a partir do núcleo atual.
+
+## Regra metodológica central
+
+Os arquivos temáticos dos microdados **não são unidos no nível individual**:
+
+```text
+arquivo temático
+→ tratamento de ausências
+→ agregação por CO_CURSO
+→ uma linha por curso
+→ validação de unicidade
+→ junção one-to-one das tabelas agregadas
+→ comparação entre cursos
+```
+
+Não se usa posição de linha como chave, não se cria identificador artificial e não se realizam joins individuais entre temas diferentes.
+
+## Estrutura operacional
+
+```text
+src/
+├── core/
+├── agregacao/
+├── analise/
+├── configuracao/
+├── extracao/
+├── qualidade/
+├── relatorios/
+├── utilitarios/
+└── validacao/
+
+scripts/
+└── pipelines/
+    └── executar_sprint_00.py
+
+tests/
+├── unit/
+└── integration/
+
+executar.py
+```
+
+Pacotes específicos de áreas concluídas não permanecem no branch operacional.
 
 ## Requisitos
-
-- Python 3.11 ou superior;
-- VS Code;
-- Git;
-- aproximadamente 1 GB livre.
-
-## Instalação no Windows/PowerShell
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-Coloque em `dados_brutos/`:
+Fontes locais esperadas em `dados_brutos/`:
 
 - `microdados_enade_licenciaturas_2025.zip`;
 - `conceito_enade_licenciaturas.xlsx`.
 
 ## Execução
 
-A Sprint 0 pode ser reproduzida com:
+```powershell
+python executar.py --listar
+python executar.py fontes
+```
+
+Novas áreas são registradas em `executar.py` somente durante seu desenvolvimento operacional.
+
+## Validação
 
 ```powershell
-python executar_sprint_00.py
+python -m pytest -q -m "not integration"
+python -m pytest -q -m integration
+python -m pytest -q
+python -m ruff check .
 ```
 
-Execute o piloto de Matemática:
+## Documentação
 
-```powershell
-python executar_sprint_01.py
-pytest -q
-ruff check .
-```
+- [Arquitetura](documentacao/ARQUITETURA.md)
+- [Metodologia](documentacao/METODOLOGIA.md)
+- [Execução](documentacao/EXECUCAO.md)
+- [Áreas analisadas](documentacao/AREAS_ANALISADAS.md)
+- [Qualidade e validação](documentacao/QUALIDADE_E_VALIDACAO.md)
+- [Estrutura dos relatórios](documentacao/ESTRUTURA_RELATORIOS.md)
+- [Histórico](documentacao/HISTORICO.md)
+- [Política de aposentadoria](documentacao/POLITICA_APOSENTADORIA_AREAS.md)
 
-## Principais saídas da Sprint 1
+## Histórico e entregas
 
-- `dados_processados/matematica/base_analitica_cursos.csv`;
-- agregados temáticos em `dados_processados/matematica/`;
-- benchmarks amplo e comparável;
-- `figuras/matematica/*.png`;
-- `relatorios/sprint_01_piloto_matematica.md`.
-
-## Regra metodológica central
-
-Os arquivos não podem ser unidos no nível individual. Cada tema é tratado e agregado separadamente por `CO_CURSO`; somente tabelas com uma linha por curso são unidas com validação `one_to_one`.
-
-## Git/GitHub
-
-Branch da sprint:
-
-```text
-sprint/01-bases-agregadas-matematica
-```
-
-Após execução e validação local:
-
-```powershell
-git add .
-git commit -m "feat(sprint-01): implementa bases agregadas e piloto de matemática"
-git push -u origin sprint/01-bases-agregadas-matematica
-```
-
-Os dados brutos e os arquivos extraídos não são enviados ao GitHub.
-
-## Sprint 2 — validação analítica de Matemática
-
-Execute após a Sprint 1:
-
-```powershell
-python executar_sprint_02.py
-pytest -q
-ruff check .
-```
-
-A sprint audita participação, indicadores percentuais, critérios alternativos de benchmark, sensibilidade do desempenho e dimensões preliminares do processo formativo.
-
-## Sprint 3 - Relatório ABNT de Matemática
-
-Execute `python executar_sprint_03.py` após as Sprints 0, 1 e 2. O script gera DOCX, Markdown e, quando o LibreOffice está disponível, PDF em `relatorios/matematica/`.
-
-## Sprint 4 — Piloto de Física
-
-A Sprint 4 adapta o pipeline para Física (`CO_GRUPO=1402`) e gera bases agregadas, benchmarks e 12 figuras. As análises preservam individualmente as cinco ofertas validadas da UFPA e incluem presença, `NT_GER`, `NT_OBJ`, `NT_DIS`, dificuldade percebida, processo formativo e recomendação do curso e da instituição.
-
-Execução:
-
-```powershell
-python executar_sprint_04.py
-pytest -q
-ruff check .
-```
-
-Saídas processadas locais: `dados_processados/fisica/`.
-Figuras versionáveis: `figuras/fisica/`.
-Relatório técnico: `relatorios/sprint_04_piloto_fisica.md`.
-
-## Sprint 5 — Validação analítica de Física
-
-A Sprint 5 audita presença e desempenho, testa critérios alternativos de benchmark, valida a leitura ecológica de dificuldade e perfil socioeconômico e produz quatro figuras revisadas.
-
-Execução:
-
-```powershell
-python executar_sprint_04.py
-python executar_sprint_05.py
-pytest -q
-ruff check .
-```
-
-Saídas principais:
-
-- `relatorios/sprint_05_validacao_fisica.md`;
-- `figuras/fisica/validada_*.png`;
-- produtos locais em `dados_processados/fisica/`.
+As entregas finais (relatório/PDF/DOCX/PPTX) são arquivadas externamente. O estado exato do código anterior à aposentadoria das áreas é preservado pela tag/snapshot de arquivamento e pelo histórico do Git.
