@@ -8,6 +8,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 
+
+def pasta_pipelines() -> Path:
+    return ROOT / "scripts" / "pipelines"
+
 PIPELINES: dict[str, dict[str, str]] = {
     "fontes": {
         "validacao": "executar_sprint_00.py",
@@ -91,7 +95,7 @@ def resolver_scripts(area: str, etapa: str | None) -> list[Path]:
             f"Etapa '{etapa}' não disponível para {area_normalizada}. Opções: {opcoes}"
         )
 
-    return [ROOT / registro[nome] for nome in selecionadas]
+    return [pasta_pipelines() / registro[nome] for nome in selecionadas]
 
 
 def executar_scripts(scripts: list[Path]) -> int:
@@ -125,7 +129,7 @@ def listar() -> None:
     for area, etapas in PIPELINES.items():
         print(area)
         for etapa, arquivo in etapas.items():
-            status = "disponível" if (ROOT / arquivo).exists() else "ausente nesta branch"
+            status = "disponível" if (pasta_pipelines() / arquivo).exists() else "ausente nesta branch"
             print(f"  {etapa:<10} -> {arquivo} [{status}]")
 
 

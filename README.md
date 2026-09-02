@@ -74,7 +74,7 @@ python executar.py geografia tudo
 python executar.py fisica regional
 ```
 
-Os arquivos `executar_sprint_*.py` continuam temporariamente como implementações de compatibilidade. Novos fluxos devem preferir `executar.py`.
+Os executores históricos ficam em `scripts/pipelines/` como implementações de compatibilidade. Novos fluxos devem preferir `executar.py`.
 
 
 ## Validação

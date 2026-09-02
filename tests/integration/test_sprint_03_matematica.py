@@ -10,7 +10,8 @@ def test_relatorio_docx_gerado():
 
 
 def test_arquivos_criticos_sprints_anteriores():
-    assert Path("executar_sprint_00.py").exists()
-    assert Path("executar_sprint_01.py").exists()
-    assert Path("executar_sprint_02.py").exists()
+    assert Path("executar.py").exists()
+    assert Path("scripts/pipelines/executar_sprint_00.py").exists()
+    assert Path("scripts/pipelines/executar_sprint_01.py").exists()
+    assert Path("scripts/pipelines/executar_sprint_02.py").exists()
     assert Path("src/validacao/validar_resultados_matematica.py").exists()

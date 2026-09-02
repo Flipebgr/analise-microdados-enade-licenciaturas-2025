@@ -14,6 +14,7 @@ def test_normalizar_aceita_acentos() -> None:
 def test_resolver_tudo_preserva_ordem_do_pipeline(monkeypatch) -> None:
     monkeypatch.setattr(executar, "ROOT", Path("/projeto"))
     scripts = executar.resolver_scripts("geografia", "tudo")
+    assert all(path.parent == Path("/projeto/scripts/pipelines") for path in scripts)
     assert [path.name for path in scripts] == [
         "executar_sprint_19.py",
         "executar_sprint_20.py",
@@ -24,13 +25,15 @@ def test_resolver_tudo_preserva_ordem_do_pipeline(monkeypatch) -> None:
 def test_fisica_regional_e_etapa_separada(monkeypatch) -> None:
     monkeypatch.setattr(executar, "ROOT", Path("/projeto"))
     scripts = executar.resolver_scripts("fisica", "regional")
-    assert [path.name for path in scripts] == ["executar_relatorio_regional_fisica.py"]
+    assert scripts == [
+        Path("/projeto/scripts/pipelines/executar_relatorio_regional_fisica.py")
+    ]
 
 
 def test_fontes_sem_etapa_usa_validacao(monkeypatch) -> None:
     monkeypatch.setattr(executar, "ROOT", Path("/projeto"))
     scripts = executar.resolver_scripts("fontes", None)
-    assert [path.name for path in scripts] == ["executar_sprint_00.py"]
+    assert scripts == [Path("/projeto/scripts/pipelines/executar_sprint_00.py")]
 
 
 def test_area_invalida_retorna_erro() -> None:

@@ -69,11 +69,11 @@ regional
 
 ## 4. Compatibilidade com executores históricos
 
-Os arquivos `executar_sprint_*.py` continuam temporariamente no repositório porque ainda contêm a orquestração concreta de cada etapa. `executar.py` funciona como uma interface única sobre esses executores.
+Os executores históricos ficam em `scripts/pipelines/` porque ainda contêm a orquestração concreta de cada etapa. `executar.py` funciona como uma interface única sobre esses executores.
 
 Eles não devem ser removidos até que a lógica de orquestração seja migrada para módulos reutilizáveis sob `src/`.
 
-O script `executar_sprint_07_validacao.py` não integra o pipeline analítico real de Letras–Inglês e pode ser removido; a validação efetiva da área é executada pela Sprint 08.
+O antigo `executar_sprint_07_validacao.py` foi removido; a validação efetiva de Letras–Inglês é executada pela Sprint 08.
 
 ## 5. Pipelines registrados
 
