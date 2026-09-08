@@ -17,6 +17,11 @@ PIPELINES: dict[str, dict[str, str]] = {
     "fontes": {
         "validacao": "executar_sprint_00.py",
     },
+    "educacao-fisica": {
+        "base": "executar_educacao_fisica_base.py",
+        "validacao": "executar_educacao_fisica_validacao.py",
+        "relatorio": "executar_educacao_fisica_relatorio.py",
+    },
 }
 
 ORDEM_TUDO = ("base", "validacao", "relatorio")
