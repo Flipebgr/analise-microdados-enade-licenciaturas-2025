@@ -19,7 +19,11 @@ class ConfiguracaoArea:
             raise ValueError("slug deve ser informado")
         if not nome:
             raise ValueError("nome deve ser informado")
-        if not isinstance(self.co_grupo, int) or isinstance(self.co_grupo, bool) or self.co_grupo <= 0:
+        if (
+            not isinstance(self.co_grupo, int)
+            or isinstance(self.co_grupo, bool)
+            or self.co_grupo <= 0
+        ):
             raise ValueError("co_grupo deve ser um inteiro positivo")
         if (
             not isinstance(self.co_ies_focal, int)
@@ -38,11 +42,26 @@ QUIMICA = ConfiguracaoArea("quimica", "Química", 1502)
 BIOLOGIA = ConfiguracaoArea("biologia", "Ciências Biológicas", 1602)
 PEDAGOGIA = ConfiguracaoArea("pedagogia", "Pedagogia", 2001)
 GEOGRAFIA = ConfiguracaoArea("geografia", "Geografia", 3002)
+EDUCACAO_FISICA = ConfiguracaoArea(
+    "educacao_fisica",
+    "Educação Física",
+    3502,
+)
 INGLES = ConfiguracaoArea("ingles", "Letras–Inglês", 6407)
 
 AREAS: dict[str, ConfiguracaoArea] = {
     area.slug: area
-    for area in (MATEMATICA, PORTUGUES, FISICA, QUIMICA, BIOLOGIA, PEDAGOGIA, GEOGRAFIA, INGLES)
+    for area in (
+        MATEMATICA,
+        PORTUGUES,
+        FISICA,
+        QUIMICA,
+        BIOLOGIA,
+        PEDAGOGIA,
+        GEOGRAFIA,
+        EDUCACAO_FISICA,
+        INGLES,
+    )
 }
 
 
@@ -54,4 +73,6 @@ def obter_area(slug: str) -> ConfiguracaoArea:
         return AREAS[chave]
     except KeyError as exc:
         disponiveis = ", ".join(sorted(AREAS))
-        raise KeyError(f"Área desconhecida: {slug!r}. Disponíveis: {disponiveis}") from exc
+        raise KeyError(
+            f"Área desconhecida: {slug!r}. Disponíveis: {disponiveis}"
+        ) from exc
