@@ -47,6 +47,7 @@ EDUCACAO_FISICA = ConfiguracaoArea(
     "Educação Física",
     3502,
 )
+MUSICA = ConfiguracaoArea("musica", "Música", 4301)
 INGLES = ConfiguracaoArea("ingles", "Letras–Inglês", 6407)
 
 AREAS: dict[str, ConfiguracaoArea] = {
@@ -60,6 +61,7 @@ AREAS: dict[str, ConfiguracaoArea] = {
         PEDAGOGIA,
         GEOGRAFIA,
         EDUCACAO_FISICA,
+        MUSICA,
         INGLES,
     )
 }
