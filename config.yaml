@@ -21,6 +21,7 @@ areas:
   2001: "Pedagogia"
   3002: "Geografia"
   3502: "Educação Física"
+  4301: "Música"
 
 leitura_txt:
   separador: ";"

@@ -16,7 +16,12 @@ def pasta_pipelines() -> Path:
 PIPELINES: dict[str, dict[str, str]] = {
     "fontes": {
         "validacao": "executar_sprint_00.py",
-    }
+    },
+    "musica": {
+        "base": "executar_musica_base.py",
+        "validacao": "executar_musica_validacao.py",
+        "relatorio": "executar_musica_relatorio.py",
+    },
 }
 
 ORDEM_TUDO = ("base", "validacao", "relatorio")
