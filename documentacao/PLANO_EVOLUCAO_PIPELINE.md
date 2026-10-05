@@ -148,6 +148,8 @@ O adapter 2025 mapeia somente o que a edição realmente fornece.
 
 ## 8. Fase 4 — questionário e indicadores derivados
 
+**Implementada para os indicadores declarados nos contratos de 2017 e 2025.** O agregador lê cada item geral no seu arquivo oficial, normaliza e classifica as respostas segundo regras da edição, agrega por `CO_CURSO` e entrega percentuais, denominadores e contagens de ausentes, excluídos, não aplicáveis e inválidos. A resposta de múltipla escolha de `QE_I16` em 2025 aceita combinações de bolsas e rejeita combinações contraditórias com `A = nenhuma`. Regras e proveniência são retornadas para auditoria. O cálculo legado de 2025 permanece durante a migração da orquestração.
+
 Separar:
 
 ```text

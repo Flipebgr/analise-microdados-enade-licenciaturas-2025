@@ -124,7 +124,7 @@ Indicadores são agregados por curso, incluindo:
 
 O número de um item `QE_*` não transfere sua semântica entre anos. Cada indicador derivado declara edição, item de origem, respostas válidas, respostas positivas e denominador.
 
-Percentuais usam denominador válido e as ausências permanecem documentadas.
+Percentuais usam o número de respostas válidas para a regra da edição como denominador. A saída informa `n_total`, `n_valido`, `n_positivo`, `n_ausente`, `n_excluida`, `n_nao_aplicavel` e `n_invalida` por curso e indicador; denominador zero produz percentual ausente. Em 2025, `QE_I05=C` e `QE_I06/QE_I07=H` significam desconhecimento e não entram no denominador. `QE_I16` de 2025 aceita respostas múltiplas separadas por vírgula; `A` (nenhuma) junto com outra categoria é incoerente e conta como inválida. Em 2017, `QE_I21=B` indica que ninguém na família concluiu curso superior; esse indicador não utiliza `QE_I05` de 2025.
 
 ## 8. Trajetória e condições acadêmicas
 

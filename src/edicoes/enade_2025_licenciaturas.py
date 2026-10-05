@@ -72,13 +72,16 @@ def _schemas_arquivos() -> tuple[SchemaArquivo, ...]:
 
 REGRAS_SOCIOECONOMICAS = (
     RegraIndicadorQuestionario(
-        "primeira_geracao_pct", "QE_I05", frozenset("B"), frozenset("AB"), "Primeira geração no ensino superior"
+        "primeira_geracao_pct", "QE_I05", frozenset("B"), frozenset("AB"),
+        "Primeira geração no ensino superior", respostas_excluidas=frozenset("C")
     ),
     RegraIndicadorQuestionario(
-        "mae_superior_pct", "QE_I06", frozenset("EFG"), frozenset("ABCDEFG"), "Mãe com ensino superior"
+        "mae_superior_pct", "QE_I06", frozenset("EFG"), frozenset("ABCDEFG"),
+        "Mãe com ensino superior", respostas_excluidas=frozenset("H")
     ),
     RegraIndicadorQuestionario(
-        "pai_superior_pct", "QE_I07", frozenset("EFG"), frozenset("ABCDEFG"), "Pai com ensino superior"
+        "pai_superior_pct", "QE_I07", frozenset("EFG"), frozenset("ABCDEFG"),
+        "Pai com ensino superior", respostas_excluidas=frozenset("H")
     ),
     RegraIndicadorQuestionario(
         "renda_ate_3sm_pct", "QE_I09", frozenset("AB"), frozenset("ABCDEFG"), "Renda familiar de até três salários mínimos"
@@ -96,7 +99,9 @@ REGRAS_SOCIOECONOMICAS = (
         "auxilio_permanencia_pct", "QE_I15", frozenset("BCDEF"), frozenset("ABCDEF"), "Recebeu auxílio de permanência"
     ),
     RegraIndicadorQuestionario(
-        "bolsa_academica_pct", "QE_I16", frozenset("BCDEFGH"), frozenset("ABCDEFGH"), "Recebeu bolsa acadêmica"
+        "bolsa_academica_pct", "QE_I16", frozenset("BCDEFGH"), frozenset("ABCDEFGH"),
+        "Recebeu bolsa acadêmica", multipla_escolha=True,
+        respostas_exclusivas=frozenset("A")
     ),
     RegraIndicadorQuestionario(
         "estudo_4h_ou_mais_pct", "QE_I17", frozenset("CDE"), frozenset("ABCDE"), "Quatro horas semanais ou mais de estudo"

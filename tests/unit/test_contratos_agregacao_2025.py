@@ -97,6 +97,29 @@ def test_contrato_legado_socioeconomico_2025(monkeypatch):
     assert "primeira_geracao_pct" in set(regras["indicador"])
 
 
+def test_legado_bolsa_2025_conta_respostas_multiplas_validas(monkeypatch):
+    def carregar(_path, _cursos, usecols=None):
+        variavel = usecols[-1]
+        respostas = (
+            ["B,F", "A", "A,B", ".", "H", "A,B", "."]
+            if variavel == "QE_I16" else ["A"] * 7
+        )
+        return pd.DataFrame({"CO_CURSO": [1] * 5 + [2] * 2, variavel: respostas})
+
+    monkeypatch.setattr(modulo_socioeconomico, "carregar_filtrado", carregar)
+    agregado, _, _ = modulo_socioeconomico.agregar_socioeconomico(
+        Path("pasta_sintetica"), [1, 2]
+    )
+    por_curso = agregado.set_index("CO_CURSO")
+
+    # A interface legada é mantida; o denominador agora inclui B,F e H.
+    assert por_curso.loc[1, "bolsa_academican_valido"] == 3
+    assert por_curso.loc[1, "bolsa_academican_positivo"] == 2
+    assert por_curso.loc[1, "bolsa_academica_pct"] == 2 / 3
+    assert por_curso.loc[2, "bolsa_academican_valido"] == 0
+    assert pd.isna(por_curso.loc[2, "bolsa_academica_pct"])
+
+
 def test_contrato_legado_processo_formativo_2025(monkeypatch):
     dados = {"CO_CURSO": [1] * 10}
     dados.update({item: [(indice % 6) + 1 for indice in range(10)] for item in modulo_processo.ITENS})

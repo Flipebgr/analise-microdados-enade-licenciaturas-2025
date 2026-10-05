@@ -118,7 +118,19 @@ agregado, auditoria_arq3 = agregar_desempenho_edicao(fonte, edicao, cursos)
 
 O mapa `edicao.desempenho.mapa_canonico` documenta a origem de cada componente. Em 2017, `formacao_geral_total` vem de `NT_FG` e `componente_especifico_total` de `NT_CE`. Em 2025, `objetiva` e `discursiva` correspondem a `NT_OBJ` e `NT_DIS`; não são renomeadas como FG ou CE. O `n_valido` de cada nota conta somente resultados com presença válida. A tabela `auditoria_arq3` mantém os nomes das colunas oficiais e não deve ser juntada por linha a outros arquivos temáticos.
 
-## 9. Reproduzir uma entrega antiga
+## 9. Indicadores do Questionário do Estudante
+
+```python
+from src.agregacao.agregar_socioeconomico import agregar_indicadores_questionario
+
+indicadores, distribuicoes, regras = agregar_indicadores_questionario(
+    fonte, edicao, cursos
+)
+```
+
+Cada item é lido no arquivo temático declarado pela edição e agregado por `CO_CURSO` antes de ser combinado com outros indicadores. `regras` informa edição, arquivo, item, rótulo, categorias, tratamento de ausências e denominador. Cada percentual usa `n_valido` da própria pergunta; a saída também informa ausências, respostas excluídas, não aplicáveis e inválidas. Em 2025, `QE_I16` permite combinações como `B,F`; `A,B` é inválida porque `A` significa nenhuma bolsa. O agregador legado de 2025 permanece disponível até a migração da orquestração e usa a mesma classificação do contrato 2025 para esse item, preservando suas colunas de saída anteriores.
+
+## 10. Reproduzir uma entrega antiga
 
 Não reintroduza o código aposentado na `main` apenas para consulta.
 

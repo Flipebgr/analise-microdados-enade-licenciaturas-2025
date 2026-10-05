@@ -108,6 +108,22 @@ class RegraIndicadorQuestionario:
     respostas_positivas: frozenset[str]
     respostas_validas: frozenset[str]
     descricao: str
+    respostas_excluidas: frozenset[str] = frozenset()
+    respostas_nao_aplicaveis: frozenset[str] = frozenset()
+    multipla_escolha: bool = False
+    respostas_exclusivas: frozenset[str] = frozenset()
+
+    def __post_init__(self) -> None:
+        if not self.respostas_positivas <= self.respostas_validas:
+            raise ValueError(f"Respostas positivas fora do domínio válido: {self.nome}")
+        if self.respostas_validas & (self.respostas_excluidas | self.respostas_nao_aplicaveis):
+            raise ValueError(f"Categorias válidas e excluídas se sobrepõem: {self.nome}")
+        if self.respostas_excluidas & self.respostas_nao_aplicaveis:
+            raise ValueError(f"Categorias excluídas e não aplicáveis se sobrepõem: {self.nome}")
+        if self.respostas_exclusivas - self.respostas_validas:
+            raise ValueError(f"Resposta exclusiva fora do domínio válido: {self.nome}")
+        if self.respostas_exclusivas and not self.multipla_escolha:
+            raise ValueError(f"Resposta exclusiva exige múltipla escolha: {self.nome}")
 
 
 @dataclass(frozen=True, slots=True)
