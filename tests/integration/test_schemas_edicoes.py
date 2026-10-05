@@ -10,6 +10,8 @@ import openpyxl
 import pytest
 
 from src.edicoes import ENADE_2017, ENADE_2025_LICENCIATURAS
+from src.extracao.inventario import inventariar_arquivos
+from src.utilitarios.leitura import obter_cursos_area
 
 pytestmark = pytest.mark.integration
 
@@ -78,3 +80,15 @@ def test_planilha_conceito_corresponde_ao_contrato(contrato, caminho):
         assert colunas_origem <= cabecalho
     finally:
         workbook.close()
+
+
+def test_piloto_2017_localiza_curso_ufpa_sem_extrair_zip():
+    caminho = ROOT / "dados_brutos" / "enade_2017" / "microdados_enade_2017_LGPD.zip"
+    if not caminho.exists():
+        pytest.skip(f"Fonte local ausente: {caminho}")
+
+    inventario = inventariar_arquivos(caminho, ENADE_2017)
+    cursos = obter_cursos_area(caminho, ENADE_2017, 1601, chunksize=10_000)
+
+    assert len(inventario) == 42
+    assert "12027" in cursos

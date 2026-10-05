@@ -1,6 +1,9 @@
 from __future__ import annotations
 from pathlib import Path
 import pandas as pd
+from src.edicoes import ENADE_2025_LICENCIATURAS
+from src.edicoes.base import ContratoEdicao
+from src.extracao.inventario import inventariar_arquivos
 from src.utilitarios.leitura import detectar_encoding, ler_txt
 
 
@@ -9,9 +12,13 @@ def contar_linhas(path: Path, encoding: str) -> int:
         return max(sum(1 for _ in f) - 1, 0)
 
 
-def inspecionar_txt(path: Path, co_ies_ufpa: int | None = None) -> tuple[dict, pd.DataFrame]:
+def inspecionar_txt(
+    path: Path,
+    co_ies_ufpa: int | None = None,
+    edicao: ContratoEdicao = ENADE_2025_LICENCIATURAS,
+) -> tuple[dict, pd.DataFrame]:
     encoding = detectar_encoding(path)
-    amostra = ler_txt(path, encoding=encoding, nrows=10000)
+    amostra = ler_txt(path, encoding=encoding, nrows=10000, leitura=edicao.leitura)
     total_linhas = contar_linhas(path, encoding)
     faltantes = amostra.isna().sum().rename("ausentes_amostra").reset_index().rename(columns={"index": "variavel"})
     faltantes["percentual_amostra"] = faltantes["ausentes_amostra"] / max(len(amostra), 1)
@@ -20,9 +27,9 @@ def inspecionar_txt(path: Path, co_ies_ufpa: int | None = None) -> tuple[dict, p
         "arquivo": path.name,
         "tamanho_bytes": path.stat().st_size,
         "encoding_detectado": encoding,
-        "separador": ";",
-        "decimal": ",",
-        "quotechar": '"',
+        "separador": edicao.leitura.separador,
+        "decimal": edicao.leitura.decimal,
+        "quotechar": edicao.leitura.quotechar,
         "possui_cabecalho": True,
         "numero_linhas": total_linhas,
         "numero_colunas": len(amostra.columns),
@@ -36,11 +43,18 @@ def inspecionar_txt(path: Path, co_ies_ufpa: int | None = None) -> tuple[dict, p
     return resumo, faltantes
 
 
-def inspecionar_todos(pasta: Path, co_ies_ufpa: int | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+def inspecionar_todos(
+    pasta: Path,
+    co_ies_ufpa: int | None = None,
+    edicao: ContratoEdicao = ENADE_2025_LICENCIATURAS,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     resumos, ausencias = [], []
-    arquivos = sorted(pasta.rglob("microdados2025_arq*.txt"), key=lambda p: int(p.stem.split("arq")[-1]))
-    for path in arquivos:
-        resumo, faltantes = inspecionar_txt(path, co_ies_ufpa)
+    arquivos = inventariar_arquivos(pasta, edicao)
+    for arquivo in arquivos.values():
+        if arquivo.membro_zip is not None:
+            raise ValueError("A inspeção completa requer um diretório extraído")
+        path = arquivo.fonte
+        resumo, faltantes = inspecionar_txt(path, co_ies_ufpa, edicao)
         resumos.append(resumo)
         faltantes.insert(0, "arquivo", path.name)
         ausencias.append(faltantes)

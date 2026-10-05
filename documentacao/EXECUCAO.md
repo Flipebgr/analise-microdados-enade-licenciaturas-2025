@@ -80,11 +80,33 @@ python -m pytest -q
 python -m ruff check .
 ```
 
-Os contratos declarativos são selecionados pelo ano em `src/edicoes/`. As áreas são resolvidas por `(edição, slug)`; exemplos: `(2017, biologia_bacharelado)` e `(2025, biologia)`.
+Os contratos são selecionados pelo ano em `src/edicoes/`. As áreas são resolvidas por `(edição, slug)`; exemplos: `(2017, biologia_bacharelado)` e `(2025, biologia)`.
 
-A CLI operacional continua limitada à validação legada de fontes nesta fase. A seleção de edição pela CLI e a leitura efetiva dos novos contratos pertencem à Fase 2.
+A CLI operacional continua limitada à validação legada de fontes. A orquestração genérica de área está prevista para a Fase 7.
 
-## 7. Reproduzir uma entrega antiga
+## 7. Inventário e leitura multi-edição
+
+`inventariar_arquivos` valida a quantidade e os nomes oficiais dos arquivos temáticos em um ZIP ou diretório extraído. Falha se houver arquivo esperado ausente, duplicado ou fora da sequência. O leitor pode abrir um membro do ZIP diretamente, sem extrair as fontes.
+
+Para obter apenas os cursos de Ciências Biológicas — Bacharelado 2017 e algumas colunas de trajetória:
+
+```python
+from pathlib import Path
+
+from src.edicoes import obter_edicao
+from src.utilitarios.leitura import carregar_filtrado_edicao, obter_cursos_area
+
+edicao = obter_edicao(2017)
+fonte = Path("dados_brutos/enade_2017/microdados_enade_2017_LGPD.zip")
+cursos = obter_cursos_area(fonte, edicao, co_grupo=1601)
+trajetoria = carregar_filtrado_edicao(
+    fonte, edicao, 2, usecols=["ANO_FIM_EM", "ANO_IN_GRAD"], cursos=cursos
+)
+```
+
+O leitor usa `chunksize` de `config.yaml`, seleciona somente as colunas necessárias e filtra cada bloco antes de acumular o subconjunto. `CO_CURSO` permanece como texto para preservar o código oficial. O filtro por `CO_GRUPO` só é aceito no `arq1`; os demais arquivos usam o conjunto de `CO_CURSO` obtido dele. Não há associação de registros individuais entre arquivos. Para análises nacionais que retenham quase todas as linhas, a agregação em streaming deve ser implementada no adaptador da etapa analítica, evitando acumular o universo completo.
+
+## 8. Reproduzir uma entrega antiga
 
 Não reintroduza o código aposentado na `main` apenas para consulta.
 

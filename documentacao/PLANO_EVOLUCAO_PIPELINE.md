@@ -102,6 +102,8 @@ Permanecem para as fases seguintes a leitura dirigida pelo contrato, os adapters
 
 ## 6. Fase 2 — inventário e carregamento
 
+**Implementada como infraestrutura de leitura.** O inventário valida ZIP ou diretório extraído conforme o contrato da edição. A leitura aceita o TXT diretamente do ZIP, valida o schema, lê apenas colunas solicitadas, usa o `chunksize` de `config.yaml` e filtra cada bloco por `CO_GRUPO` no `arq1` ou por `CO_CURSO` nos demais arquivos. O recorte 1601 foi verificado na fonte local de 2017. A integração desse leitor aos agregadores e a agregação nacional em streaming são decisões das fases analíticas seguintes.
+
 Generalizar o inventário que hoje está acoplado ao prefixo 2025.
 
 Implementar leitura filtrada eficiente para arquivos grandes. O `chunksize` já aparece em configuração histórica; a nova implementação deve efetivamente usá-lo quando apropriado.
