@@ -124,6 +124,8 @@ Quando o universo nacional for necessário, ainda preferir agregação streaming
 
 ## 7. Fase 3 — desempenho por edição
 
+**Implementada como agregador por curso dirigido pelo contrato.** O novo agregador lê somente o `arq3`, mapeia os componentes disponíveis para nomes canônicos e preserva as variáveis oficiais na tabela individual de auditoria. As estatísticas de notas usam apenas registros com o código de presença válida declarado pela edição; os denominadores, ausências e notas fora dessa situação são explicitados por curso. O agregador legado de 2025 permanece disponível até a migração da orquestração.
+
 Não forçar um schema único que destrua a semântica original.
 
 Criar um contrato canônico capaz de representar componentes opcionais, por exemplo:

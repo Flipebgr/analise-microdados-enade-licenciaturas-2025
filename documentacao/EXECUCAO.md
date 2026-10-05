@@ -106,7 +106,19 @@ trajetoria = carregar_filtrado_edicao(
 
 O leitor usa `chunksize` de `config.yaml`, seleciona somente as colunas necessárias e filtra cada bloco antes de acumular o subconjunto. `CO_CURSO` permanece como texto para preservar o código oficial. O filtro por `CO_GRUPO` só é aceito no `arq1`; os demais arquivos usam o conjunto de `CO_CURSO` obtido dele. Não há associação de registros individuais entre arquivos. Para análises nacionais que retenham quase todas as linhas, a agregação em streaming deve ser implementada no adaptador da etapa analítica, evitando acumular o universo completo.
 
-## 8. Reproduzir uma entrega antiga
+## 8. Desempenho por edição
+
+O agregador usa apenas o `arq3` da edição e produz uma linha por `CO_CURSO`:
+
+```python
+from src.agregacao.agregar_desempenho import agregar_desempenho_edicao
+
+agregado, auditoria_arq3 = agregar_desempenho_edicao(fonte, edicao, cursos)
+```
+
+O mapa `edicao.desempenho.mapa_canonico` documenta a origem de cada componente. Em 2017, `formacao_geral_total` vem de `NT_FG` e `componente_especifico_total` de `NT_CE`. Em 2025, `objetiva` e `discursiva` correspondem a `NT_OBJ` e `NT_DIS`; não são renomeadas como FG ou CE. O `n_valido` de cada nota conta somente resultados com presença válida. A tabela `auditoria_arq3` mantém os nomes das colunas oficiais e não deve ser juntada por linha a outros arquivos temáticos.
+
+## 9. Reproduzir uma entrega antiga
 
 Não reintroduza o código aposentado na `main` apenas para consulta.
 

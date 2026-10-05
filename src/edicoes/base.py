@@ -72,21 +72,27 @@ class SchemaDesempenho:
     vetores_string: tuple[str, ...] = ()
 
     @property
-    def variaveis_numericas(self) -> tuple[str, ...]:
-        valores = (
-            self.geral,
-            self.objetiva,
-            self.discursiva,
-            self.formacao_geral,
-            self.formacao_geral_objetiva,
-            self.formacao_geral_discursiva,
-            self.componente_especifico,
-            self.componente_especifico_objetiva,
-            self.componente_especifico_discursiva,
-            self.proficiencia,
-            self.acertos,
+    def mapa_canonico(self) -> dict[str, str]:
+        """Liga cada componente disponível à variável oficial da edição."""
+
+        campos = (
+            ("geral", self.geral),
+            ("objetiva", self.objetiva),
+            ("discursiva", self.discursiva),
+            ("formacao_geral_total", self.formacao_geral),
+            ("formacao_geral_objetiva", self.formacao_geral_objetiva),
+            ("formacao_geral_discursiva", self.formacao_geral_discursiva),
+            ("componente_especifico_total", self.componente_especifico),
+            ("componente_especifico_objetiva", self.componente_especifico_objetiva),
+            ("componente_especifico_discursiva", self.componente_especifico_discursiva),
+            ("proficiencia", self.proficiencia),
+            ("acertos", self.acertos),
         )
-        return tuple(valor for valor in valores if valor is not None)
+        return {canonico: oficial for canonico, oficial in campos if oficial is not None}
+
+    @property
+    def variaveis_numericas(self) -> tuple[str, ...]:
+        return tuple(self.mapa_canonico.values())
 
 
 @dataclass(frozen=True, slots=True)

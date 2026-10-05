@@ -10,6 +10,7 @@ import openpyxl
 import pytest
 
 from src.edicoes import ENADE_2017, ENADE_2025_LICENCIATURAS
+from src.agregacao.agregar_desempenho import agregar_desempenho_edicao
 from src.extracao.inventario import inventariar_arquivos
 from src.utilitarios.leitura import obter_cursos_area
 
@@ -92,3 +93,21 @@ def test_piloto_2017_localiza_curso_ufpa_sem_extrair_zip():
 
     assert len(inventario) == 42
     assert "12027" in cursos
+
+
+def test_desempenho_piloto_2017_reconcilia_presenca_no_arq3():
+    caminho = ROOT / "dados_brutos" / "enade_2017" / "microdados_enade_2017_LGPD.zip"
+    if not caminho.exists():
+        pytest.skip(f"Fonte local ausente: {caminho}")
+
+    agregado, individual = agregar_desempenho_edicao(
+        caminho, ENADE_2017, ["12027"], chunksize=10_000
+    )
+    curso = agregado.iloc[0]
+
+    assert len(individual) == curso["registros_microdados"] == 23
+    assert curso["presentes_validos"] == 13
+    assert curso["formacao_geral_total_n_valido"] == 13
+    assert curso["componente_especifico_total_n_valido"] == 13
+    assert curso["formacao_geral_total_n_ausente"] == 10
+    assert "proficiencia_mean" not in agregado.columns

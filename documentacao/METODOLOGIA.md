@@ -101,6 +101,8 @@ São reportados, quando disponíveis:
 - tamanho de efeito;
 - incerteza.
 
+No agregador multi-edição, as estatísticas de notas usam apenas registros com a situação de presença válida definida no contrato da edição. `registros_microdados` é o total de linhas do `arq3` no curso; `presentes_validos` é o subconjunto com presença válida; cada componente apresenta `n_valido`, `n_ausente` em relação a todos os registros, `n_presente_sem_nota` e `n_nota_fora_presenca_valida`. Notas fora da presença válida ficam na tabela individual de auditoria, mas não entram nas estatísticas agregadas. A tabela agregada contém uma linha por `CO_CURSO`.
+
 Ofertas com N pequeno são interpretadas com cautela.
 
 ## 7. Perfil demográfico e socioeconômico
