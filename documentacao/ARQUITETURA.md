@@ -2,7 +2,7 @@
 
 ## 1. Objetivo arquitetural
 
-O projeto transforma os microdados do Enade das Licenciaturas 2025 em bases analíticas por curso, comparações institucionais e territoriais, figuras e relatórios técnico-científicos.
+O projeto transforma microdados de diferentes edições do Enade em bases analíticas por curso, comparações institucionais e territoriais, figuras e relatórios técnico-científicos.
 
 A arquitetura foi desenhada para impedir relações indevidas entre registros individuais de arquivos temáticos distintos.
 
@@ -43,11 +43,21 @@ Regras:
 
 ## 4. Núcleo compartilhado
 
+Antes do núcleo compartilhado, `src/edicoes/` declara os contratos oficiais de cada edição: inventário, leitura, schemas, presença, questionários, capacidades e planilha de Conceito Enade. O código da edição não determina se um recurso se aplica a toda área. Essa decisão pertence à configuração da área e do grau.
+
+```text
+edição (o que a fonte oferece)
+        +
+área/grau (o que se aplica ao recorte)
+        ↓
+núcleo compartilhado
+```
+
 ### `src/core/`
 
 Contratos estruturais reutilizados pelas áreas:
 
-- `ConfiguracaoArea`: slug, nome, `CO_GRUPO` e IES focal;
+- `ConfiguracaoArea`: edição, slug, nome, grau, `CO_GRUPO`, IES focal e aplicabilidade;
 - preparação e normalização do catálogo;
 - validação de unicidade por curso;
 - junções one-to-one;
@@ -173,6 +183,8 @@ Testes unitários usam dados sintéticos ou funções isoladas. Testes de integr
 
 ## 8. Configuração das áreas
 
-O registro central fica em `src/core/configuracao_area.py` e a configuração de arquivos e parâmetros de leitura fica em `config.yaml`.
+O registro central fica em `src/core/configuracao_area.py` e a configuração de arquivos e parâmetros de leitura fica em `config.yaml`. Uma área é resolvida pela chave composta `(edição, slug)`. `CO_GRUPO` não é tratado como identificador semântico global entre anos.
+
+Os contratos de 2017 e 2025 ficam em `src/edicoes/`. A capacidade pertence à edição; a aplicabilidade pertence à área/grau. Por exemplo, 2017 oferece o questionário específico de licenciaturas, mas Ciências Biológicas — Bacharelado (`2017`, `1601`) não o utiliza.
 
 A presença de uma área no registro central apenas permite parametrização; não equivale à conclusão de seu pipeline analítico.

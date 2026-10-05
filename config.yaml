@@ -2,6 +2,34 @@ projeto:
   nome: "Análise de Microdados - ENADE Licenciaturas 2025"
   ano: 2025
 
+# Configuração multi-edição. As chaves legadas abaixo permanecem enquanto o
+# executor operacional de 2025 não for migrado nas fases seguintes.
+edicoes:
+  2017:
+    nome: "Enade 2017"
+    arquivos:
+      zip_microdados: "dados_brutos/enade_2017/microdados_enade_2017_LGPD.zip"
+      conceito_enade: "dados_brutos/enade_2017/resultados_conceito_enade_2017.xlsx"
+      pasta_extraida: "dados_extraidos/enade_2017"
+    leitura_txt:
+      separador: ";"
+      decimal: "."
+      quotechar: '"'
+      chunksize: 100000
+      encodings: ["utf-8-sig", "utf-8", "cp1252", "latin1"]
+  2025:
+    nome: "Enade das Licenciaturas 2025"
+    arquivos:
+      zip_microdados: "dados_brutos/microdados_enade_licenciaturas_2025.zip"
+      conceito_enade: "dados_brutos/conceito_enade_licenciaturas.xlsx"
+      pasta_extraida: "dados_extraidos/enade_2025"
+    leitura_txt:
+      separador: ";"
+      decimal: ","
+      quotechar: '"'
+      chunksize: 100000
+      encodings: ["utf-8-sig", "utf-8", "cp1252", "latin1"]
+
 arquivos:
   zip_microdados: "dados_brutos/microdados_enade_licenciaturas_2025.zip"
   conceito_enade: "dados_brutos/conceito_enade_licenciaturas.xlsx"
@@ -22,6 +50,46 @@ areas:
   3002: "Geografia"
   3502: "Educação Física"
   4301: "Música"
+
+areas_por_edicao:
+  2017:
+    biologia_bacharelado:
+      nome: "Ciências Biológicas — Bacharelado"
+      co_grupo: 1601
+      grau: "Bacharelado"
+      co_ies_focal: 569
+      aplicabilidade:
+        proficiencia: false
+        recomendacao: false
+        questionario_licenciatura: false
+  2025:
+    matematica:
+      {nome: "Matemática", co_grupo: 702, grau: "Licenciatura", co_ies_focal: 569, aplicabilidade: {proficiencia: true, recomendacao: true, questionario_licenciatura: false}}
+    portugues:
+      {nome: "Letras–Português", co_grupo: 904, grau: "Licenciatura", co_ies_focal: 569, aplicabilidade: {proficiencia: true, recomendacao: true, questionario_licenciatura: false}}
+    fisica:
+      {nome: "Física", co_grupo: 1402, grau: "Licenciatura", co_ies_focal: 569, aplicabilidade: {proficiencia: true, recomendacao: true, questionario_licenciatura: false}}
+    quimica:
+      nome: "Química"
+      co_grupo: 1502
+      grau: "Licenciatura"
+      co_ies_focal: 569
+      aplicabilidade:
+        proficiencia: true
+        recomendacao: true
+        questionario_licenciatura: false
+    biologia:
+      {nome: "Ciências Biológicas", co_grupo: 1602, grau: "Licenciatura", co_ies_focal: 569, aplicabilidade: {proficiencia: true, recomendacao: true, questionario_licenciatura: false}}
+    pedagogia:
+      {nome: "Pedagogia", co_grupo: 2001, grau: "Licenciatura", co_ies_focal: 569, aplicabilidade: {proficiencia: true, recomendacao: true, questionario_licenciatura: false}}
+    geografia:
+      {nome: "Geografia", co_grupo: 3002, grau: "Licenciatura", co_ies_focal: 569, aplicabilidade: {proficiencia: true, recomendacao: true, questionario_licenciatura: false}}
+    educacao_fisica:
+      {nome: "Educação Física", co_grupo: 3502, grau: "Licenciatura", co_ies_focal: 569, aplicabilidade: {proficiencia: true, recomendacao: true, questionario_licenciatura: false}}
+    musica:
+      {nome: "Música", co_grupo: 4301, grau: "Licenciatura", co_ies_focal: 569, aplicabilidade: {proficiencia: true, recomendacao: true, questionario_licenciatura: false}}
+    ingles:
+      {nome: "Letras–Inglês", co_grupo: 6407, grau: "Licenciatura", co_ies_focal: 569, aplicabilidade: {proficiencia: true, recomendacao: true, questionario_licenciatura: false}}
 
 leitura_txt:
   separador: ";"

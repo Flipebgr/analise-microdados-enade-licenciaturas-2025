@@ -11,6 +11,30 @@ def carregar_config() -> dict:
         return yaml.safe_load(f)
 
 
+def carregar_config_edicao(ano: int) -> dict:
+    """Retorna a configuração de arquivos de uma edição conhecida."""
+
+    config = carregar_config()
+    try:
+        edicao = config["edicoes"][ano]
+    except KeyError as exc:
+        disponiveis = ", ".join(str(valor) for valor in sorted(config.get("edicoes", {})))
+        raise KeyError(f"Edição não configurada: {ano}. Disponíveis: {disponiveis}") from exc
+    return edicao.copy()
+
+
+def carregar_config_area(edicao: int, slug: str) -> dict:
+    """Resolve configuração de área pela edição e pelo slug."""
+
+    config = carregar_config()
+    chave = slug.strip().lower()
+    try:
+        area = config["areas_por_edicao"][edicao][chave]
+    except KeyError as exc:
+        raise KeyError(f"Área não configurada na edição {edicao}: {slug!r}") from exc
+    return area.copy()
+
+
 def caminho_relativo(valor: str) -> Path:
     return ROOT / valor
 

@@ -66,6 +66,8 @@ Se a árvore já estiver suja, não apagar alterações do usuário.
 
 ## 5. Fase 1 — configuração/contrato da edição
 
+**Implementada no escopo declarativo inicial.** Os contratos de 2017 e 2025 estão separados em `src/edicoes/`, e as áreas são resolvidas pela edição e pelo slug. A implementação também separa capacidade da edição de aplicabilidade da área/grau e define valor original, faixa numérica anulável e situação como campos distintos do Conceito Enade.
+
 Criar uma representação explícita de edição com, no mínimo:
 
 ```text
@@ -93,6 +95,10 @@ supports_proficiencia = false
 supports_recomendacao = false
 supports_itens_licenciatura = true/false conforme grau
 ```
+
+Na implementação, `supports_itens_licenciatura` é capacidade da edição. A utilização efetiva é uma propriedade independente da configuração da área/grau. O bacharelado 1601 em 2017, por exemplo, não aplica esse bloco embora a edição o ofereça.
+
+Permanecem para as fases seguintes a leitura dirigida pelo contrato, os adapters dos agregadores, o loader multi-edição do Conceito Enade, a orquestração genérica e o teste end-to-end do piloto.
 
 ## 6. Fase 2 — inventário e carregamento
 

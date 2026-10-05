@@ -35,6 +35,7 @@ Análises individuais podem combinar somente variáveis que estejam no mesmo arq
 
 - Conceito ausente permanece ausente.
 - Ausência de conceito nunca é recodificada como Conceito Enade 1.
+- A representação normalizada mantém três campos separados: valor original, conceito numérico anulável e situação do conceito. `SC` aparece na situação e no valor original, nunca na coluna numérica 1–5.
 - Ofertas informadas mas não localizadas nas fontes permanecem documentadas sem fabricação de `CO_CURSO`, inscritos, participantes ou desempenho.
 - Conceitos superiores podem servir de contraste interno, mas não são tratados automaticamente como categorias normativas de suficiência ou excelência.
 
@@ -75,16 +76,15 @@ Os benchmarks reduzem parte da heterogeneidade observável, mas não constituem 
 
 ## 6. Participação e desempenho
 
-Indicadores principais:
+Indicadores principais, quando definidos pela edição:
 
 - inscritos;
 - participantes;
 - taxa de participação/presença;
 - `NT_GER`;
-- `NT_OBJ`;
-- `NT_DIS`;
-- `PROFICIENCIA`;
-- `QT_ACERTOS`;
+- componentes objetivos e discursivos declarados no contrato da edição;
+- Formação Geral e Componente Específico separados quando a fonte os fornece;
+- proficiência e acertos somente quando a edição os oferece e a área os aplica;
 - presença;
 - situação da prova;
 - reaplicação.
@@ -118,7 +118,9 @@ Indicadores são agregados por curso, incluindo:
 - auxílios;
 - moradia;
 - horas de estudo;
-- itens relevantes de `QE_I01–QE_I19`.
+- itens relevantes declarados pelo instrumento da edição.
+
+O número de um item `QE_*` não transfere sua semântica entre anos. Cada indicador derivado declara edição, item de origem, respostas válidas, respostas positivas e denominador.
 
 Percentuais usam denominador válido e as ausências permanecem documentadas.
 
@@ -126,9 +128,9 @@ Percentuais usam denominador válido e as ausências permanecem documentadas.
 
 Indicadores de turno, tempo desde o ingresso, trabalho, bolsas, auxílios e dedicação aos estudos são interpretados no nível do curso quando integrados a outros temas.
 
-## 9. Processo formativo — QE_I20–QE_I66
+## 9. Processo formativo
 
-Os 47 itens devem ser lidos e documentados antes da formação de índices.
+Os itens são definidos pelo instrumento oficial de cada edição. Em 2025, o contrato existente usa `QE_I20–QE_I66`; em 2017, o bloco geral é `QE_I27–QE_I68`. Eles devem ser lidos e documentados antes da formação de índices.
 
 Antes de criar dimensão composta é necessário:
 
@@ -154,9 +156,11 @@ Agrupamentos exploratórios não equivalem a índices validados.
 
 ## 10. Recomendação
 
-`QE_I68`, `QE_I69` e, quando pertinente, `QE_I70` devem manter os rótulos oficiais.
+Em 2025, `QE_I68`, `QE_I69` e, quando pertinente, `QE_I70` devem manter os rótulos oficiais.
 
 Eles não são agrupados automaticamente sob o termo “satisfação”.
+
+Essa capacidade não existe no contrato de 2017. Nessa edição, `QE_I68` pertence ao processo formativo e `QE_I69+` inicia o questionário específico de licenciaturas. Para o bacharelado 1601, esse último bloco é não aplicável.
 
 ## 11. Correlações
 

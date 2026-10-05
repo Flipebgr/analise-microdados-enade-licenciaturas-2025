@@ -24,6 +24,15 @@ microdados_enade_licenciaturas_2025.zip
 conceito_enade_licenciaturas.xlsx
 ```
 
+Para validar os contratos de 2017, as fontes opcionais ficam em:
+
+```text
+dados_brutos/enade_2017/microdados_enade_2017_LGPD.zip
+dados_brutos/enade_2017/resultados_conceito_enade_2017.xlsx
+```
+
+Ausência dessas fontes produz `skip` explícito somente nos testes de integração. Testes unitários não dependem de `dados_brutos/`.
+
 ## 4. Executor operacional
 
 ```powershell
@@ -70,6 +79,10 @@ python -m pytest -q -m integration
 python -m pytest -q
 python -m ruff check .
 ```
+
+Os contratos declarativos são selecionados pelo ano em `src/edicoes/`. As áreas são resolvidas por `(edição, slug)`; exemplos: `(2017, biologia_bacharelado)` e `(2025, biologia)`.
+
+A CLI operacional continua limitada à validação legada de fontes nesta fase. A seleção de edição pela CLI e a leitura efetiva dos novos contratos pertencem à Fase 2.
 
 ## 7. Reproduzir uma entrega antiga
 
