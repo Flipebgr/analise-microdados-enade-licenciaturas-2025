@@ -245,6 +245,8 @@ A sintaxe final deve respeitar o estilo atual do repositório; não é obrigató
 
 ## 12. Fase 8 — pacote de evidências
 
+**Implementada para as saídas já validadas.** A etapa analítica da CLI gera `evidencias.json` versionado, ao lado dos CSVs auditáveis. O pacote contém proveniência, cobertura, ofertas focais, desempenho, perfil e processo formativo, incluindo denominadores e percentuais separados dos códigos 7/8. Benchmark, efeitos, associações ecológicas e alertas permanecem explicitamente indisponíveis até receberem contratos e validação próprios.
+
 Gerar `evidencias.json` a partir de produtos já validados.
 
 O pacote deve registrar também proveniência:

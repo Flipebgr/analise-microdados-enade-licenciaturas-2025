@@ -108,6 +108,7 @@ def executar_area_cli(argv: list[str]) -> int:
 
     from src.core.configuracao_area import obter_area
     from src.edicoes import obter_edicao
+    from src.evidencias import construir_evidencias, salvar_evidencias
     from src.orquestracao.area import analisar_area, preparar_area, salvar_resultado_area
 
     parser = argparse.ArgumentParser(description="Pipeline genérico do Enade por área.")
@@ -126,6 +127,9 @@ def executar_area_cli(argv: list[str]) -> int:
         raiz = args.saida or ROOT / "dados_processados" / str(args.ano) / area.slug
         pasta = raiz / ("validacao" if args.etapa == "validacao" else "analise")
         arquivos = salvar_resultado_area(resultado, pasta)
+        if args.etapa != "validacao":
+            evidencias = construir_evidencias(resultado, edicao, area, args.microdados)
+            arquivos.append(salvar_evidencias(evidencias, pasta / "evidencias.json"))
     except (ValueError, KeyError, FileNotFoundError) as exc:
         print(f"ERRO: {exc}", file=sys.stderr)
         return 2

@@ -23,6 +23,8 @@ arquivo temático
 
 Na orquestração multi-edição, a caracterização do `arq1` é reduzida a uma linha por `CO_CURSO` somente após verificar que os atributos estruturais são constantes dentro do curso. O Conceito é reconciliado pela mesma chave e as diferenças de cobertura são registradas. Desempenho, indicadores do questionário e processo formativo entram na base apenas depois de agregados e validados como one-to-one.
 
+O pacote `evidencias.json` é uma interface estruturada derivada dessas tabelas agregadas e não substitui seus CSVs auditáveis. Ele preserva as regras, fontes, variáveis, denominadores e ausências de cada indicador. No processo formativo, a validação exige que `n_total` corresponda à soma das categorias e que os percentuais de "não sei responder" e "não se aplica" usem `n_total`. Campos sem contrato analítico validado são declarados indisponíveis, sem conclusão automática.
+
 São proibidos:
 
 - uso da posição da linha como chave;

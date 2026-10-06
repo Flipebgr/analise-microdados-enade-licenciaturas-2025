@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import executar
+import src.evidencias as evidencias
 import src.orquestracao.area as orquestracao
 
 
@@ -64,3 +65,27 @@ def test_comando_area_rejeita_slug_de_outra_edicao(capsys) -> None:
         "--microdados", "micro.zip", "--conceitos", "conceito.xlsx",
     ]) == 2
     assert "Área desconhecida" in capsys.readouterr().err
+
+
+def test_comando_area_analise_grava_evidencias(monkeypatch, tmp_path, capsys) -> None:
+    resultado = object()
+    chamadas = []
+    monkeypatch.setattr(orquestracao, "analisar_area", lambda *a, **k: resultado)
+    monkeypatch.setattr(orquestracao, "salvar_resultado_area", lambda *a, **k: [])
+    monkeypatch.setattr(evidencias, "construir_evidencias", lambda *a: {"schema_version": "1.0"})
+
+    def salvar(pacote, destino):
+        chamadas.append((pacote, destino))
+        return destino
+
+    monkeypatch.setattr(evidencias, "salvar_evidencias", salvar)
+
+    assert executar.main([
+        "area", "--ano", "2017", "--slug", "biologia_bacharelado",
+        "--microdados", "micro.zip", "--conceitos", "conceito.xlsx",
+        "--etapa", "analise", "--saida", str(tmp_path),
+    ]) == 0
+    assert chamadas == [
+        ({"schema_version": "1.0"}, tmp_path / "analise" / "evidencias.json")
+    ]
+    assert "evidencias.json" in capsys.readouterr().out

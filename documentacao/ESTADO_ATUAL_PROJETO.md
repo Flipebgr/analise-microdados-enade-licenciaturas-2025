@@ -3,7 +3,7 @@
 ## Referência de continuidade
 
 - Branch operacional: `feature/pipeline-multiedicao`.
-- Último commit registrado neste estado: `992dbff feat(fase-7): orquestra pipeline generico por area`.
+- Confirme o hash atual com `git log -1 --oneline`; este documento não substitui o estado do Git.
 - Fontes oficiais permanecem em `dados_brutos/` e não devem ser alteradas.
 - A unidade de integração entre arquivos temáticos é exclusivamente `CO_CURSO`, após agregação e validação de unicidade.
 
@@ -16,21 +16,22 @@
 - Fase 5 (`2df6680` e `20b3415`): processo formativo por item; códigos 7 e 8 permanecem fora da escala analítica e têm percentuais próprios com denominador `n_total`.
 - Fase 6 (`250b066`): loader de Conceito Enade por edição, com tabela original, proveniência, `SC` separado da faixa numérica e validações de schema.
 - Fase 7 (`992dbff`): primeira implementação da CLI genérica por edição/área e da orquestração que caracteriza o `arq1`, reconcilia o Conceito e combina somente tabelas agregadas one-to-one por `CO_CURSO`.
+- Fase 8: pacote `evidencias.json` versionado, derivado dos agregados e CSVs auditáveis. Ele inclui proveniência, cobertura, ofertas focais, desempenho, perfil e processo formativo; os percentuais dos códigos 7 e 8 são validados contra `n_total`.
 
 ## Estado validado
 
 - O piloto de Ciências Biológicas — Bacharelado 2017 usa `CO_GRUPO=1601`, `CO_IES=569` e tem como referência de regressão `CO_CURSO=12027`.
 - Na execução do piloto, a base reuniu 268 cursos e reconciliou a oferta focal com 23 inscritos oficiais, 13 participantes oficiais e Conceito Enade 3.
 - A execução de Biologia 2025 reuniu 428 cursos, mantendo o contrato próprio da edição.
-- A validação mais recente da Fase 7 registrou 149 testes aprovados; os testes de integração foram executados separadamente, com 17 aprovados e 132 não selecionados. `ruff check .` passou.
+- A validação mais recente da Fase 8 registrou 155 testes aprovados; os testes de integração foram executados separadamente, com 19 aprovados e 136 não selecionados. `ruff check .` passou.
 
 ## Limites atuais
 
-- A Fase 7 gera CSVs de validação e análise em `dados_processados/<ano>/<slug>/`; não gera `evidencias.json`, benchmarks, alertas ou relatório final.
+- A Fase 7 gera CSVs de validação e análise em `dados_processados/<ano>/<slug>/`; na análise, a Fase 8 grava também `evidencias.json` ao lado desses CSVs.
 - Não há junção individual entre arquivos temáticos e as tabelas individuais de auditoria não entram na base integrada.
 - O piloto UFPA possui Conceito 3; não deve ser criado artificialmente um grupo de UFPA com Conceito 1.
 - A matriz teórica de dimensões do processo formativo permanece pendente. Não formar índice global ou dimensões sem a validação teórica e psicométrica correspondente.
 
 ## Próximo passo recomendado
 
-Iniciar a Fase 8: definir e validar o schema versionado de `evidencias.json`, derivado exclusivamente dos CSVs e agregados já validados. O pacote deve conservar proveniência, denominadores, ausências e, no processo formativo, os percentuais separados de códigos 7 e 8. Antes disso, revisar se a Fase 7 precisa de contratos explícitos para o contraste focal e benchmarks, pois eles não devem ser inferidos automaticamente para o piloto de Conceito 3.
+Iniciar a Fase 9: definir contratos para contraste focal, benchmarks, efeitos e alertas mecânicos. O piloto de Ciências Biológicas — Bacharelado 2017 possui Conceito 3; não se deve inferir ou fabricar o Grupo A de Conceito 1. A matriz teórica do processo formativo continua pré-requisito para dimensões ou índices.

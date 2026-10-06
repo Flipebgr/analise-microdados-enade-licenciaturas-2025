@@ -171,7 +171,9 @@ python executar.py area --ano 2017 --slug biologia_bacharelado `
 
 `--etapa validacao` confere o `arq1` e a planilha de Conceito, produzindo uma linha por curso e uma auditoria de cobertura. `--etapa analise` ou `tudo` também executa os agregadores de desempenho, questionário e processo formativo. As saídas CSV ficam em `dados_processados/<ano>/<slug>/validacao/` ou `analise/`; `--saida` permite escolher outra pasta-raiz. Nenhuma tabela individual de arquivos temáticos distintos é juntada ou gravada nessa base. O `CO_CURSO` e os demais identificadores oficiais permanecem texto.
 
-Esta etapa produz bases auditáveis, **não** o `evidencias.json`, benchmarks ou o relatório final. A auditoria registra cursos presentes somente em uma das fontes e, na etapa analítica, a cobertura de desempenho; divergência de ano, grupo, IES ou município entre ofertas correspondentes causa erro. As contagens `INSCRITOS` e `PARTICIPANTES` são as oficiais da planilha de Conceito; `registros_microdados` é uma contagem distinta da fonte temática de desempenho.
+Na etapa `analise` ou `tudo`, o comando também produz `evidencias.json` ao lado dos CSVs auditáveis. O pacote versionado reúne edição, área, cobertura, ofertas focais, desempenho, perfil, processo formativo e proveniência. Ele preserva por curso e item `n_total`, `n_valido`, as contagens e os percentuais separados de "não sei responder" e "não se aplica"; estes últimos usam `n_total` como denominador. O JSON não substitui os CSVs e não contém registros individuais.
+
+Benchmarks, efeitos, associações ecológicas, alertas e achados priorizados aparecem explicitamente como indisponíveis/vazios até que seus contratos analíticos sejam implementados e validados. A auditoria registra cursos presentes somente em uma das fontes e, na etapa analítica, a cobertura de desempenho; divergência de ano, grupo, IES ou município entre ofertas correspondentes causa erro. As contagens `INSCRITOS` e `PARTICIPANTES` são as oficiais da planilha de Conceito; `registros_microdados` é uma contagem distinta da fonte temática de desempenho.
 
 ## 13. Reproduzir uma entrega antiga
 
