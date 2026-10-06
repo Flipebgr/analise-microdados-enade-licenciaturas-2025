@@ -141,3 +141,27 @@ Falhas não devem ser ocultadas. Se uma dependência ou fonte estiver ausente, d
 A próxima frente é tornar o núcleo capaz de processar a edição completa do Enade 2017 e usar **Ciências Biológicas — Bacharelado (`CO_GRUPO=1601`)** como primeiro teste end-to-end.
 
 Não criar `src/biologia_bacharelado_2017/` ou equivalente como solução principal. A meta é um pipeline genérico dirigido por edição + área.
+
+
+## 11.  Continuidade entre sessões
+
+Antes de iniciar trabalho substancial neste repositório:
+
+1. Leia `documentacao/ESTADO_ATUAL_PROJETO.md`.
+2. Confirme o estado real com:
+   - `git status`
+   - `git branch --show-current`
+   - `git log -1 --oneline`
+3. Caso haja divergência entre a documentação e o repositório, o estado do Git e do código é a fonte primária.
+
+Ao concluir uma tarefa que altere significativamente o projeto:
+
+1. Atualize `documentacao/ESTADO_ATUAL_PROJETO.md`.
+2. Registre:
+   - trabalho concluído;
+   - estado dos testes;
+   - decisões técnicas novas;
+   - pendências;
+   - próximo passo recomendado.
+3. Não use esse arquivo como diário detalhado.
+4. Mantenha apenas o contexto necessário para que outra sessão consiga continuar o trabalho.
