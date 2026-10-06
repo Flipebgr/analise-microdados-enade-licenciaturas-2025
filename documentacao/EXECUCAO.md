@@ -144,7 +144,23 @@ O agregador lê somente o arquivo temático que contém todos os itens declarado
 
 Este caminho não cria dimensão, índice ou alfa global. O agregador legado de 2025 permanece disponível, mas seu alfa para o bloco completo é apenas diagnóstico histórico e não valida uma escala única. O questionário oficial de 2025 contém a questão 67, porém `QE_I67` não aparece nos arquivos temáticos do ZIP público disponível; por isso não é inventada nesta saída.
 
-## 11. Reproduzir uma entrega antiga
+## 11. Conceito Enade por edição
+
+```python
+from pathlib import Path
+
+from src.edicoes import carregar_conceitos_edicao, obter_edicao
+
+edicao = obter_edicao(2017)
+fonte_conceito = Path("dados_brutos/enade_2017/resultados_conceito_enade_2017.xlsx")
+conceitos, tabela_original, proveniencia = carregar_conceitos_edicao(fonte_conceito, edicao)
+```
+
+O contrato da edição declara a aba, os cabeçalhos oficiais e os campos numéricos. A tabela `conceitos` mantém uma linha por `CO_CURSO`, com códigos oficiais em texto, inscritos e participantes oficiais, valor original do conceito, faixa numérica anulável e situação (`com_conceito`, `sem_conceito`, `ausente` ou `nao_reconhecida`). `SC` nunca vira Conceito 1. A tabela `tabela_original` preserva inclusive notas de rodapé, enquanto `proveniencia` registra fonte, SHA256, aba e quantidades de linhas. Linhas apenas de nota de rodapé são excluídas da tabela de ofertas; registros parcialmente preenchidos sem `CO_CURSO` geram erro.
+
+O conceito contínuo existe na fonte de 2017. Na planilha de 2025, os valores da coluna normalizada correspondente permanecem ausentes; eles não são calculados a partir da faixa. A leitura não altera as planilhas em `dados_brutos/` e ainda não integra a CLI operacional (Fase 7).
+
+## 12. Reproduzir uma entrega antiga
 
 Não reintroduza o código aposentado na `main` apenas para consulta.
 

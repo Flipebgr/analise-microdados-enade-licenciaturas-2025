@@ -140,11 +140,6 @@ SCHEMA_CONCEITO_2025 = SchemaConceito(
         ("Conceito Enade (Faixa)", "CONCEITO_ENADE_ORIGINAL"),
     ),
     colunas_numericas=(
-        "NU_ANO",
-        "CO_GRUPO",
-        "CO_IES",
-        "CO_CURSO",
-        "CO_MUNIC_CURSO",
         "INSCRITOS",
         "PARTICIPANTES",
         "TOTAL_PADRAO_PROFICIENCIA",

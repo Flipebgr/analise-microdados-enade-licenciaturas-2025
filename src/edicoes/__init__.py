@@ -6,6 +6,7 @@ from src.edicoes.base import (
     SituacaoConceito,
     normalizar_conceito,
 )
+from src.edicoes.conceito import carregar_conceitos_edicao
 from src.edicoes.enade_2017 import ENADE_2017
 from src.edicoes.enade_2025_licenciaturas import ENADE_2025_LICENCIATURAS
 
@@ -30,6 +31,7 @@ __all__ = [
     "ENADE_2017",
     "ENADE_2025_LICENCIATURAS",
     "SituacaoConceito",
+    "carregar_conceitos_edicao",
     "normalizar_conceito",
     "obter_edicao",
 ]

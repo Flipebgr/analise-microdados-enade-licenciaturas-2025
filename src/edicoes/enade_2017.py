@@ -137,11 +137,6 @@ SCHEMA_CONCEITO_2017 = SchemaConceito(
         ("Observação", "OBSERVACAO_CONCEITO"),
     ),
     colunas_numericas=(
-        "NU_ANO",
-        "CO_GRUPO",
-        "CO_IES",
-        "CO_CURSO",
-        "CO_MUNIC_CURSO",
         "INSCRITOS",
         "PARTICIPANTES",
         "NOTA_BRUTA_FG",

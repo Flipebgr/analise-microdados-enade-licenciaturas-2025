@@ -36,6 +36,8 @@ Análises individuais podem combinar somente variáveis que estejam no mesmo arq
 - Conceito ausente permanece ausente.
 - Ausência de conceito nunca é recodificada como Conceito Enade 1.
 - A representação normalizada mantém três campos separados: valor original, conceito numérico anulável e situação do conceito. `SC` aparece na situação e no valor original, nunca na coluna numérica 1–5.
+- O loader dirigido pelo contrato da edição mantém os identificadores oficiais como texto, valida unicidade por `CO_CURSO` e conserva a planilha original para auditoria. Remove da tabela analítica somente linhas de rodapé sem oferta; inconsistências de schema, ano, código ou contagem falham explicitamente.
+- Inscritos e participantes da planilha são contagens oficiais por curso, não registros individuais reconstruídos. O conceito contínuo de 2017 é preservado; não é inferido para 2025, cuja fonte não o fornece.
 - Ofertas informadas mas não localizadas nas fontes permanecem documentadas sem fabricação de `CO_CURSO`, inscritos, participantes ou desempenho.
 - Conceitos superiores podem servir de contraste interno, mas não são tratados automaticamente como categorias normativas de suficiência ou excelência.
 

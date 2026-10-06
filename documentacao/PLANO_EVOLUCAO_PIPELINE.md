@@ -204,6 +204,8 @@ Dimensões de 2025 não devem ser transplantadas automaticamente para 2017.
 
 ## 10. Fase 6 — Conceito Enade
 
+**Implementada no carregamento independente da orquestração.** O schema da edição declara aba e correspondências de colunas. O loader entrega ofertas normalizadas, tabela original e proveniência, valida `CO_CURSO` único e mantém `SC`/ausente fora da faixa numérica. A ligação com a CLI de área permanece para a Fase 7.
+
 Criar loader/adaptador por fonte/edição que normalize para campos canônicos, por exemplo:
 
 ```text
