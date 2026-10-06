@@ -21,6 +21,8 @@ arquivo temático
 → comparação entre cursos
 ```
 
+Na orquestração multi-edição, a caracterização do `arq1` é reduzida a uma linha por `CO_CURSO` somente após verificar que os atributos estruturais são constantes dentro do curso. O Conceito é reconciliado pela mesma chave e as diferenças de cobertura são registradas. Desempenho, indicadores do questionário e processo formativo entram na base apenas depois de agregados e validados como one-to-one.
+
 São proibidos:
 
 - uso da posição da linha como chave;

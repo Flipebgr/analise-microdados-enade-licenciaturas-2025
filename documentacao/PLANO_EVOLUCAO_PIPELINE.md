@@ -229,6 +229,8 @@ Manter a fonte original disponível para auditoria.
 
 ## 11. Fase 7 — pipeline genérico de área
 
+**Em implementação.** A primeira fatia oferece CLI por edição/slug e fontes explícitas, caracteriza cursos pelo `arq1`, reconcilia a planilha de Conceito e combina somente agregados one-to-one de desempenho, indicadores gerais e processo formativo. Os CSVs de validação e análise ficam separados. Ainda faltam contratos de comparações e benchmarks para a área focal; a saída atual não deve ser confundida com relatório ou pacote de evidências.
+
 Depois que os adapters estiverem estáveis, criar uma orquestração genérica.
 
 Exemplo conceitual de CLI:

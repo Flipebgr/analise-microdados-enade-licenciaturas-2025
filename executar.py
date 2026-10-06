@@ -103,6 +103,37 @@ def listar() -> None:
     )
 
 
+def executar_area_cli(argv: list[str]) -> int:
+    """Despacha o pipeline multi-edição sem alterar os comandos legados."""
+
+    from src.core.configuracao_area import obter_area
+    from src.edicoes import obter_edicao
+    from src.orquestracao.area import analisar_area, preparar_area, salvar_resultado_area
+
+    parser = argparse.ArgumentParser(description="Pipeline genérico do Enade por área.")
+    parser.add_argument("--ano", type=int, required=True)
+    parser.add_argument("--slug", required=True, help="Slug da área na edição informada.")
+    parser.add_argument("--microdados", type=Path, required=True)
+    parser.add_argument("--conceitos", type=Path, required=True)
+    parser.add_argument("--etapa", choices=("validacao", "analise", "tudo"), default="tudo")
+    parser.add_argument("--saida", type=Path)
+    args = parser.parse_args(argv)
+    try:
+        edicao = obter_edicao(args.ano)
+        area = obter_area(args.ano, args.slug)
+        executar = preparar_area if args.etapa == "validacao" else analisar_area
+        resultado = executar(args.microdados, args.conceitos, edicao, area)
+        raiz = args.saida or ROOT / "dados_processados" / str(args.ano) / area.slug
+        pasta = raiz / ("validacao" if args.etapa == "validacao" else "analise")
+        arquivos = salvar_resultado_area(resultado, pasta)
+    except (ValueError, KeyError, FileNotFoundError) as exc:
+        print(f"ERRO: {exc}", file=sys.stderr)
+        return 2
+    for arquivo in arquivos:
+        print(arquivo)
+    return 0
+
+
 def criar_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="Executor dos pipelines operacionais do ENADE Licenciaturas 2025."
@@ -126,6 +157,9 @@ def criar_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+    argv = sys.argv[1:] if argv is None else argv
+    if argv and argv[0] == "area":
+        return executar_area_cli(argv[1:])
     parser = criar_parser()
     args = parser.parse_args(argv)
 

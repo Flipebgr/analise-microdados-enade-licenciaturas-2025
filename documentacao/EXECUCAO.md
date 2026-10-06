@@ -160,7 +160,20 @@ O contrato da edição declara a aba, os cabeçalhos oficiais e os campos numér
 
 O conceito contínuo existe na fonte de 2017. Na planilha de 2025, os valores da coluna normalizada correspondente permanecem ausentes; eles não são calculados a partir da faixa. A leitura não altera as planilhas em `dados_brutos/` e ainda não integra a CLI operacional (Fase 7).
 
-## 12. Reproduzir uma entrega antiga
+## 12. Pipeline genérico de área — primeira implementação da Fase 7
+
+```powershell
+python executar.py area --ano 2017 --slug biologia_bacharelado `
+  --microdados dados_brutos/enade_2017/microdados_enade_2017_LGPD.zip `
+  --conceitos dados_brutos/enade_2017/resultados_conceito_enade_2017.xlsx `
+  --etapa tudo
+```
+
+`--etapa validacao` confere o `arq1` e a planilha de Conceito, produzindo uma linha por curso e uma auditoria de cobertura. `--etapa analise` ou `tudo` também executa os agregadores de desempenho, questionário e processo formativo. As saídas CSV ficam em `dados_processados/<ano>/<slug>/validacao/` ou `analise/`; `--saida` permite escolher outra pasta-raiz. Nenhuma tabela individual de arquivos temáticos distintos é juntada ou gravada nessa base. O `CO_CURSO` e os demais identificadores oficiais permanecem texto.
+
+Esta etapa produz bases auditáveis, **não** o `evidencias.json`, benchmarks ou o relatório final. A auditoria registra cursos presentes somente em uma das fontes e, na etapa analítica, a cobertura de desempenho; divergência de ano, grupo, IES ou município entre ofertas correspondentes causa erro. As contagens `INSCRITOS` e `PARTICIPANTES` são as oficiais da planilha de Conceito; `registros_microdados` é uma contagem distinta da fonte temática de desempenho.
+
+## 13. Reproduzir uma entrega antiga
 
 Não reintroduza o código aposentado na `main` apenas para consulta.
 
