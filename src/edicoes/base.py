@@ -135,6 +135,29 @@ class SchemaQuestionario:
     regras_indicadores: tuple[RegraIndicadorQuestionario, ...]
     codigos_validos_processo: frozenset[int]
     codigos_especiais_processo: tuple[tuple[int, str], ...]
+    codigos_concordancia_processo: frozenset[int]
+    descricao_escala_processo: str
+
+    def __post_init__(self) -> None:
+        itens = self.itens_processo_formativo
+        if not itens or len(set(itens)) != len(itens):
+            raise ValueError("Itens de processo formativo devem ser únicos e não vazios")
+        if not self.codigos_validos_processo:
+            raise ValueError("Processo formativo exige códigos válidos")
+        especiais = dict(self.codigos_especiais_processo)
+        rotulos = tuple(especiais.values())
+        if len(especiais) != len(self.codigos_especiais_processo) or len(set(rotulos)) != len(rotulos):
+            raise ValueError("Códigos e rótulos especiais do processo devem ser únicos")
+        if any(not isinstance(rotulo, str) or not rotulo.isidentifier() for rotulo in rotulos):
+            raise ValueError("Rótulos especiais do processo devem nomear colunas válidas")
+        if self.codigos_validos_processo & especiais.keys():
+            raise ValueError("Códigos válidos e especiais do processo se sobrepõem")
+        if not self.codigos_concordancia_processo or not (
+            self.codigos_concordancia_processo <= self.codigos_validos_processo
+        ):
+            raise ValueError("Códigos de concordância devem pertencer à escala válida")
+        if not self.descricao_escala_processo.strip():
+            raise ValueError("A direção da escala do processo deve ser declarada")
 
 
 @dataclass(frozen=True, slots=True)

@@ -183,6 +183,12 @@ Não compartilhar indicador entre edições apenas porque o nome final é igual.
 
 ## 9. Fase 5 — processo formativo
 
+**Motor por item implementado; dimensões ainda não definidas.** O agregador multi-edição lê os itens declarados no contrato da edição, classifica códigos 1–6, 7/8, ausências e respostas inválidas, e retorna estatísticas e denominadores por `CO_CURSO` e item. A direção da escala e os códigos de concordância ficam no contrato. O novo caminho não calcula alfa ou média global do bloco. A análise de dimensões depende de leitura e justificativa item a item, além das verificações abaixo.
+
+O diagnóstico legado exploratório de 2025 também exclui 7/8 e respostas fora da escala do alfa e do número de casos completos. Seus agrupamentos candidatos não foram validados e não são índices; a matriz teórica permanece pendente, sem bloquear a Fase 6.
+
+Ressalva da fonte: o questionário 2025 contém `QE_I67`, mas nenhum arquivo temático do ZIP público disponível traz essa coluna. O contrato usa `QE_I20–QE_I66` e não inventa respostas para `QE_I67`.
+
 O motor estatístico deve aceitar lista/configuração de itens e códigos especiais.
 
 Antes de construir dimensões:

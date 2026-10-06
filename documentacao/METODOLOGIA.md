@@ -132,7 +132,9 @@ Indicadores de turno, tempo desde o ingresso, trabalho, bolsas, auxílios e dedi
 
 ## 9. Processo formativo
 
-Os itens são definidos pelo instrumento oficial de cada edição. Em 2025, o contrato existente usa `QE_I20–QE_I66`; em 2017, o bloco geral é `QE_I27–QE_I68`. Eles devem ser lidos e documentados antes da formação de índices.
+Os itens são definidos pelo instrumento oficial e pela disponibilidade nos microdados de cada edição. Em 2025, o contrato usa `QE_I20–QE_I66`; em 2017, o bloco geral é `QE_I27–QE_I68`. A questão 67 consta do questionário oficial de 2025, mas não dos arquivos temáticos do ZIP disponível e, portanto, não é calculada. Ambas as edições declaram 1 = discordância total, 6 = concordância total, 4–6 = concordância para fins descritivos, 7 = não sei responder e 8 = não se aplica.
+
+O agregador multi-edição resume cada item separadamente por `CO_CURSO`, informa o denominador válido, os códigos especiais, ausências e respostas inválidas, e não calcula um índice ou alfa global. O alfa para o bloco inteiro no agregador legado de 2025 é apenas um diagnóstico histórico; não constitui validação de unidimensionalidade. No diagnóstico exploratório de dimensões de 2025, os códigos 7/8 e respostas fora da escala 1–6 são excluídos tanto do alfa quanto da contagem de casos completos. Seus agrupamentos de itens continuam preliminares e não devem ser usados como índices até a validação teórica.
 
 Antes de criar dimensão composta é necessário:
 

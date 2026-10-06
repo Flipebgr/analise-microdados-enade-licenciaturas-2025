@@ -208,6 +208,8 @@ ENADE_2017 = ContratoEdicao(
         regras_indicadores=REGRAS_SOCIOECONOMICAS,
         codigos_validos_processo=frozenset(range(1, 7)),
         codigos_especiais_processo=((7, "nao_sabe_responder"), (8, "nao_se_aplica")),
+        codigos_concordancia_processo=frozenset((4, 5, 6)),
+        descricao_escala_processo="1=discordância total; 6=concordância total",
     ),
     capacidades=CapacidadesEdicao(
         proficiencia=False,

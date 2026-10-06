@@ -3,6 +3,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from src.edicoes import ENADE_2025_LICENCIATURAS
+
 # Agrupamento preliminar para diagnóstico. A validação final depende do texto oficial dos itens.
 DIMENSOES = {
     "organizacao_didatico_pedagogica": [f"QE_I{i}" for i in range(20, 34)],
@@ -13,8 +15,16 @@ DIMENSOES = {
 }
 
 
+def _respostas_validas(df: pd.DataFrame) -> pd.DataFrame:
+    """Mantém apenas os códigos da escala 2025; 7/8 não são pontuações."""
+
+    numericos = df.apply(pd.to_numeric, errors="coerce")
+    codigos = ENADE_2025_LICENCIATURAS.questionario.codigos_validos_processo
+    return numericos.where(numericos.isin(codigos))
+
+
 def cronbach_alpha(df: pd.DataFrame) -> float:
-    x = df.apply(pd.to_numeric, errors="coerce").dropna()
+    x = _respostas_validas(df).dropna()
     if x.shape[0] < 3 or x.shape[1] < 2:
         return np.nan
     variancias = x.var(axis=0, ddof=1).sum()
@@ -34,7 +44,7 @@ def diagnosticar_dimensoes(dados_individuais: pd.DataFrame) -> pd.DataFrame:
             "dimensao": nome,
             "itens": ", ".join(presentes),
             "n_itens": len(presentes),
-            "n_casos_completos": int(dados_individuais[presentes].apply(pd.to_numeric, errors="coerce").dropna().shape[0]) if presentes else 0,
+            "n_casos_completos": int(_respostas_validas(dados_individuais[presentes]).dropna().shape[0]) if presentes else 0,
             "alpha_cronbach": alpha,
             "decisao": "diagnóstico preliminar; exige validação teórica dos itens",
         })
