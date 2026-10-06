@@ -150,6 +150,10 @@ def agregar_processo_formativo_edicao(
             .div(denominador_total)
             .astype("Float64")
         )
+        for rotulo in especiais.values():
+            resumo[f"{rotulo}_pct"] = (
+                resumo[f"n_{rotulo}"].div(denominador_total).astype("Float64")
+            )
         resumo = resumo.reset_index().rename(columns={"index": "CO_CURSO"})
         resumo.insert(0, "edicao", edicao.ano)
         resumo.insert(2, "ITEM", item)
@@ -173,6 +177,7 @@ def agregar_processo_formativo_edicao(
             ),
             "escala": questionario.descricao_escala_processo,
             "denominador_concordancia": "n_valido",
+            "denominador_codigos_especiais": "n_total",
             "decisao_dimensao": "não formar índice sem validação teórica dos itens",
         })
 

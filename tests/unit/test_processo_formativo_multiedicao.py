@@ -59,6 +59,8 @@ def test_agregador_classifica_ausencias_especiais_invalidos_e_curso_sem_linhas(m
     assert item["n_invalido"] == 1
     assert item["n_nao_sabe_responder"] == 1
     assert item["n_nao_se_aplica"] == 1
+    assert item["nao_sabe_responder_pct"] == pytest.approx(1 / 8)
+    assert item["nao_se_aplica_pct"] == pytest.approx(1 / 8)
     assert item["concordancia_n"] == 2
     assert item["concordancia_pct"] == pytest.approx(2 / 3)
     assert item["ausencia_analitica_pct"] == pytest.approx(5 / 8)
@@ -67,7 +69,10 @@ def test_agregador_classifica_ausencias_especiais_invalidos_e_curso_sem_linhas(m
     assert pd.isna(sem_validos["concordancia_pct"])
     assert sem_linhas["n_total"] == 0
     assert pd.isna(sem_linhas["ausencia_analitica_pct"])
+    assert pd.isna(sem_linhas["nao_sabe_responder_pct"])
+    assert pd.isna(sem_linhas["nao_se_aplica_pct"])
     assert set(proveniencia["item"]) == set(itens)
+    assert set(proveniencia["denominador_codigos_especiais"]) == {"n_total"}
     assert "cronbach_alpha" not in proveniencia.columns
 
 
@@ -99,3 +104,5 @@ def test_agregador_retorna_ausentes_quando_nenhum_curso_tem_linhas(monkeypatch):
     assert (resumo["n_total"] == 0).all()
     assert resumo["concordancia_pct"].isna().all()
     assert resumo["ausencia_analitica_pct"].isna().all()
+    assert resumo["nao_sabe_responder_pct"].isna().all()
+    assert resumo["nao_se_aplica_pct"].isna().all()

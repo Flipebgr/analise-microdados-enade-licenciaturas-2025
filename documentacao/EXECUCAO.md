@@ -140,7 +140,7 @@ processo_cursos, processo_itens, proveniencia = agregar_processo_formativo_edica
 )
 ```
 
-O agregador lê somente o arquivo temático que contém todos os itens declarados pela edição: `QE_I27–QE_I68` em 2017 e `QE_I20–QE_I66` nos microdados disponíveis de 2025. A tabela `processo_itens` apresenta, por curso e item, `n_total`, `n_valido`, `n_ausente`, `n_invalido`, contagens dos códigos especiais, média, mediana, desvio-padrão e concordância. `concordancia_pct` usa `n_valido`; `ausencia_analitica_pct` usa `n_total`. Denominador zero produz percentual ausente. `processo_cursos` contém uma linha por `CO_CURSO`, e `proveniencia` registra os códigos e a direção da escala.
+O agregador lê somente o arquivo temático que contém todos os itens declarados pela edição: `QE_I27–QE_I68` em 2017 e `QE_I20–QE_I66` nos microdados disponíveis de 2025. A tabela `processo_itens` apresenta, por curso e item, `n_total`, `n_valido`, `n_ausente`, `n_invalido`, contagens dos códigos especiais, média, mediana, desvio-padrão e concordância. `concordancia_pct` usa `n_valido`; `ausencia_analitica_pct`, `nao_sabe_responder_pct` e `nao_se_aplica_pct` usam `n_total` do item. As taxas são frações entre 0 e 1; denominador zero produz percentual ausente. `processo_cursos` contém uma linha por `CO_CURSO`, e `proveniencia` registra os códigos e a direção da escala.
 
 Este caminho não cria dimensão, índice ou alfa global. O agregador legado de 2025 permanece disponível, mas seu alfa para o bloco completo é apenas diagnóstico histórico e não valida uma escala única. O questionário oficial de 2025 contém a questão 67, porém `QE_I67` não aparece nos arquivos temáticos do ZIP público disponível; por isso não é inventada nesta saída.
 

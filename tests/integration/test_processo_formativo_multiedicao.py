@@ -55,7 +55,12 @@ def test_piloto_2025_nao_inventa_qe_i67_ausente_dos_microdados():
     assert primeiro["n_valido"] == 10
     assert primeiro["n_ausente"] == 1
     assert primeiro["n_nao_sabe_responder"] == 1
+    assert primeiro["nao_sabe_responder_pct"] == pytest.approx(1 / 12)
+    assert primeiro["nao_se_aplica_pct"] == 0
     assert primeiro["concordancia_pct"] == 1
+    polo = resumo.loc[resumo["ITEM"] == "QE_I43"].iloc[0]
+    assert polo["n_nao_se_aplica"] == 5
+    assert polo["nao_se_aplica_pct"] == pytest.approx(5 / 12)
     assert set(proveniencia["arquivo"]) == {"microdados2025_arq4.txt"}
     assert (
         resumo["n_total"] == resumo[[

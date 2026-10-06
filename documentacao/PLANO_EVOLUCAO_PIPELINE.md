@@ -255,6 +255,8 @@ regra de cálculo
 versão do schema
 ```
 
+No bloco de processo formativo, preservar por curso e item `n_total`, `n_valido`, as contagens e os percentuais separados de "não sei responder" e "não se aplica", com denominador `n_total`. O relatório final deve exibir esses percentuais junto aos respectivos N; não apresentar concordância sem seu denominador válido.
+
 Não permitir números hardcoded em geradores de relatório quando eles já existem no pacote/CSV validado.
 
 ## 13. Fase 9 — motor de alertas
