@@ -2,7 +2,7 @@
 
 ## 1. Estado atual
 
-O branch operacional contém apenas a infraestrutura compartilhada e a validação das fontes. Pipelines de áreas já concluídas foram aposentados depois da entrega.
+O branch operacional contém a infraestrutura compartilhada, a validação das fontes e a CLI multi-edição `area`, que publica agregados e evidências da Fase 8. Pipelines históricos de áreas já concluídas foram aposentados depois da entrega.
 
 A reprodução histórica de uma área encerrada deve usar o snapshot/tag criado antes da aposentadoria, e não o branch operacional atual.
 
@@ -82,7 +82,7 @@ python -m ruff check .
 
 Os contratos são selecionados pelo ano em `src/edicoes/`. As áreas são resolvidas por `(edição, slug)`; exemplos: `(2017, biologia_bacharelado)` e `(2025, biologia)`.
 
-A CLI operacional continua limitada à validação legada de fontes. A orquestração genérica de área está prevista para a Fase 7.
+A CLI oferece a validação legada `fontes` e a orquestração genérica `area` descrita adiante.
 
 ## 7. Inventário e leitura multi-edição
 
@@ -158,7 +158,7 @@ conceitos, tabela_original, proveniencia = carregar_conceitos_edicao(fonte_conce
 
 O contrato da edição declara a aba, os cabeçalhos oficiais e os campos numéricos. A tabela `conceitos` mantém uma linha por `CO_CURSO`, com códigos oficiais em texto, inscritos e participantes oficiais, valor original do conceito, faixa numérica anulável e situação (`com_conceito`, `sem_conceito`, `ausente` ou `nao_reconhecida`). `SC` nunca vira Conceito 1. A tabela `tabela_original` preserva inclusive notas de rodapé, enquanto `proveniencia` registra fonte, SHA256, aba e quantidades de linhas. Linhas apenas de nota de rodapé são excluídas da tabela de ofertas; registros parcialmente preenchidos sem `CO_CURSO` geram erro.
 
-O conceito contínuo existe na fonte de 2017. Na planilha de 2025, os valores da coluna normalizada correspondente permanecem ausentes; eles não são calculados a partir da faixa. A leitura não altera as planilhas em `dados_brutos/` e ainda não integra a CLI operacional (Fase 7).
+O conceito contínuo existe na fonte de 2017. Na planilha de 2025, os valores da coluna normalizada correspondente permanecem ausentes; eles não são calculados a partir da faixa. A leitura não altera as planilhas em `dados_brutos/` e integra a CLI `area` desde a Fase 7.
 
 ## 12. Pipeline genérico de área — primeira implementação da Fase 7
 
@@ -175,7 +175,17 @@ Na etapa `analise` ou `tudo`, o comando também produz `evidencias.json` ao lado
 
 Benchmarks, efeitos, associações ecológicas, alertas e achados priorizados aparecem explicitamente como indisponíveis/vazios até que seus contratos analíticos sejam implementados e validados. A auditoria registra cursos presentes somente em uma das fontes e, na etapa analítica, a cobertura de desempenho; divergência de ano, grupo, IES ou município entre ofertas correspondentes causa erro. As contagens `INSCRITOS` e `PARTICIPANTES` são as oficiais da planilha de Conceito; `registros_microdados` é uma contagem distinta da fonte temática de desempenho.
 
-## 13. Reproduzir uma entrega antiga
+## 13. Publicação da análise e comportamento em erro (Fase 8)
+
+`--microdados` aceita ZIP ou diretório extraído com o inventário completo da edição. Ambos percorrem leitura, agregação, evidências e salvamento. Os hashes do manifesto são dos bytes de cada TXT utilizado, com caminho relativo e tamanho; não se calcula hash fictício de diretório. A ordem do manifesto é lexical e determinística.
+
+Em `analise` e `tudo`, a CLI constrói e valida o pacote schema `2.0`, escreve CSVs/JSON em staging no mesmo volume, relê o JSON, confere sua correspondência com os agregados e verifica os bytes textuais dos CSVs. Somente então troca o diretório inteiro de saída, com backup temporário da geração anterior. Falha antes da troca preserva o destino; falha na promoção restaura o backup. Temporários e lock são removidos ao encerrar normalmente. Erros retornam código 2, com mensagem; resíduos cuja limpeza falhar são informados por aviso.
+
+Um lock exclusivo impede duas publicações simultâneas no mesmo destino. A transação cobre erros tratáveis, não garante durabilidade contra queda de energia ou encerramento forçado do processo. Entre as duas renomeações a pasta pode estar brevemente indisponível; leitores devem abrir uma geração após o término da publicação. Se o processo for interrompido, inspecione `.analise.lock` e `.analise-staging-*/anterior` ao lado de `analise/`. Comprove que não há escritor ativo antes de recuperar o backup/remover o lock. Se até a restauração falhar por erro de filesystem, a exceção informa o backup preservado. Não apague esse backup sem conferir a geração válida.
+
+O comando `validacao` mantém seu escopo anterior de CSVs, sem pacote analítico. O schema `1.0` não é aceito pelo novo validador: regenere o conjunto com a CLI; não altere apenas o número da versão. Dados oficiais e contagens temáticas permanecem medidas distintas.
+
+## 14. Reproduzir uma entrega antiga
 
 Não reintroduza o código aposentado na `main` apenas para consulta.
 

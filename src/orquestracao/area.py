@@ -144,9 +144,12 @@ def analisar_area(
     questionario, distribuicoes, regras = agregar_indicadores_questionario(
         microdados, edicao, cursos, chunksize=chunksize
     )
-    processo, itens, proveniencia_processo = agregar_processo_formativo_edicao(
-        microdados, edicao, cursos, chunksize=chunksize
-    )
+    processo = pd.DataFrame({"CO_CURSO": cursos})
+    itens = proveniencia_processo = None
+    if edicao.capacidades.processo_formativo and area.aplicabilidade.processo_formativo:
+        processo, itens, proveniencia_processo = agregar_processo_formativo_edicao(
+            microdados, edicao, cursos, chunksize=chunksize
+        )
     base = resultado.base_cursos
     for nome, tabela in (
         ("desempenho", desempenho),

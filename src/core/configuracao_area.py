@@ -12,6 +12,7 @@ class AplicabilidadeArea:
     proficiencia: bool = False
     recomendacao: bool = False
     questionario_licenciatura: bool = False
+    processo_formativo: bool = True
 
 
 @dataclass(frozen=True, slots=True)
@@ -156,7 +157,7 @@ def validar_compatibilidade_area(edicao: ContratoEdicao, area: ConfiguracaoArea)
     disponiveis = edicao.capacidades
     incompatibilidades = [
         nome
-        for nome in ("proficiencia", "recomendacao", "questionario_licenciatura")
+        for nome in ("proficiencia", "recomendacao", "questionario_licenciatura", "processo_formativo")
         if getattr(solicitadas, nome) and not getattr(disponiveis, nome)
     ]
     if incompatibilidades:

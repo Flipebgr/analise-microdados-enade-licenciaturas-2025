@@ -229,7 +229,7 @@ Manter a fonte original disponível para auditoria.
 
 ## 11. Fase 7 — pipeline genérico de área
 
-**Em implementação.** A primeira fatia oferece CLI por edição/slug e fontes explícitas, caracteriza cursos pelo `arq1`, reconcilia a planilha de Conceito e combina somente agregados one-to-one de desempenho, indicadores gerais e processo formativo. Os CSVs de validação e análise ficam separados. Ainda faltam contratos de comparações e benchmarks para a área focal; a saída atual não deve ser confundida com relatório ou pacote de evidências.
+**Orquestração descritiva implementada.** A CLI por edição/slug e fontes explícitas caracteriza cursos pelo `arq1`, reconcilia a planilha de Conceito e combina somente agregados one-to-one de desempenho, indicadores gerais e processo formativo. Os CSVs de validação e análise ficam separados. A Fase 8 acrescenta o pacote de evidências; comparações e benchmarks ficam para a Fase 9A. A saída ainda não é o relatório final.
 
 Depois que os adapters estiverem estáveis, criar uma orquestração genérica.
 
@@ -245,7 +245,7 @@ A sintaxe final deve respeitar o estilo atual do repositório; não é obrigató
 
 ## 12. Fase 8 — pacote de evidências
 
-**Implementada para as saídas já validadas.** A etapa analítica da CLI gera `evidencias.json` versionado, ao lado dos CSVs auditáveis. O pacote contém proveniência, cobertura, ofertas focais, desempenho, perfil e processo formativo, incluindo denominadores e percentuais separados dos códigos 7/8. Benchmark, efeitos, associações ecológicas e alertas permanecem explicitamente indisponíveis até receberem contratos e validação próprios.
+**Aprovada após auditoria corretiva; alterações locais para revisão.** A etapa analítica da CLI gera `evidencias.json` schema `2.0`, ao lado dos CSVs auditáveis. O pacote contém proveniência, cobertura, ofertas focais, participação, desempenho, perfil e processo formativo. A validação rejeita blocos obrigatórios ausentes, cursos inexistentes, chaves duplicadas, contagens/denominadores incompatíveis e proporções inválidas. O manifesto deriva das origens dos produtos, com tamanho e SHA256 dos TXT efetivamente utilizados em ZIP ou diretório. A publicação usa staging, conferência JSON/CSVs e rollback da troca de diretório em caso de falha. Ver `AUDITORIA_FASE_8.md`, `EXECUCAO.md` e `METODOLOGIA.md` para evidências, contrato e limites operacionais. Benchmark, efeitos, associações ecológicas e alertas permanecem explicitamente indisponíveis.
 
 Gerar `evidencias.json` a partir de produtos já validados.
 
@@ -265,7 +265,17 @@ No bloco de processo formativo, preservar por curso e item `n_total`, `n_valido`
 
 Não permitir números hardcoded em geradores de relatório quando eles já existem no pacote/CSV validado.
 
-## 13. Fase 9 — motor de alertas
+## 13. Fase 9 — pré-requisitos analíticos e motor de alertas
+
+**Planejada, não iniciada.** A divisão explicita dependências antes implícitas entre a orquestração e os alertas.
+
+### Fase 9A — contraste focal, benchmarks e efeitos/incerteza
+
+Formalizar a pergunta e o contraste focal; definir universos amplo e comparável, critérios de inclusão/exclusão, pesos, N válidos, estimandos, medidas de efeito e incerteza. Integrar essas estruturas somente após contratos e testes próprios. O piloto de 2017 possui Conceito 3: não fabricar Grupo A de Conceito 1. Dimensões do processo continuam dependentes da matriz teórica.
+
+### Fase 9B — motor de alertas mecânicos
+
+Consumir resultados validados da Fase 9A. Mudanças de sinal entre benchmarks, IC incluindo zero e sensibilidade a benchmark/outlier dependem de contrastes, estimativas e análises de sensibilidade disponíveis. Ausência de estrutura deve ser explicitada, nunca convertida em resultado favorável.
 
 O código pode automatizar triagem mecânica, não conclusões substantivas.
 

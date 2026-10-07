@@ -46,6 +46,7 @@ class CapacidadesEdicao:
     proficiencia: bool
     recomendacao: bool
     questionario_licenciatura: bool
+    processo_formativo: bool = True
 
 
 @dataclass(frozen=True, slots=True)

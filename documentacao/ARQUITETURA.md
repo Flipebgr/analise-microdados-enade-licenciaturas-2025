@@ -105,6 +105,14 @@ Infraestrutura compartilhada para:
 
 ### Outros componentes
 
+- `src/orquestracao/area.py`: caracteriza, reconcilia fontes e junta somente agregados por curso;
+- `src/evidencias/construir.py`: projeta os agregados no pacote schema `2.0`, sem inferência substantiva;
+- `src/evidencias/validar.py`: schema obrigatório, integridade referencial, unicidade, denominadores, aplicabilidade e coerência entre blocos;
+- `src/evidencias/proveniencia.py`: resolve origens dos produtos e calcula manifesto determinístico dos TXT usados em ZIP/diretório;
+- `src/evidencias/publicar.py`: staging, verificação cruzada JSON/CSVs, lock de escritor, troca de diretório e rollback; detalhes de recuperação em `EXECUCAO.md`.
+
+Esses módulos não implementam benchmarks, efeitos ou alertas. A Fase 9A definirá os contratos analíticos e a Fase 9B consumirá seus resultados para triagem mecânica; a Fase 10 mantém a regressão end-to-end permanente. O pacote `1.0` precisa ser regenerado para `2.0`, pois a validação passou a exigir o contrato integral.
+
 - `src/configuracao/`: caminhos e leitura de configuração;
 - `src/extracao/`: extração do ZIP oficial;
 - `src/qualidade/`: inspeção e auditorias;

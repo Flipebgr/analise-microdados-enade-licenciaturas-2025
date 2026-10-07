@@ -5,6 +5,7 @@ from pathlib import Path
 import executar
 import src.evidencias as evidencias
 import src.orquestracao.area as orquestracao
+import src.evidencias.publicar as publicacao
 
 
 def test_normalizar_aceita_acentos() -> None:
@@ -74,11 +75,11 @@ def test_comando_area_analise_grava_evidencias(monkeypatch, tmp_path, capsys) ->
     monkeypatch.setattr(orquestracao, "salvar_resultado_area", lambda *a, **k: [])
     monkeypatch.setattr(evidencias, "construir_evidencias", lambda *a: {"schema_version": "1.0"})
 
-    def salvar(pacote, destino):
-        chamadas.append((pacote, destino))
-        return destino
+    def publicar(resultado, pacote, destino):
+        chamadas.append((pacote, destino / "evidencias.json"))
+        return [destino / "evidencias.json"]
 
-    monkeypatch.setattr(evidencias, "salvar_evidencias", salvar)
+    monkeypatch.setattr(publicacao, "publicar_analise", publicar)
 
     assert executar.main([
         "area", "--ano", "2017", "--slug", "biologia_bacharelado",
