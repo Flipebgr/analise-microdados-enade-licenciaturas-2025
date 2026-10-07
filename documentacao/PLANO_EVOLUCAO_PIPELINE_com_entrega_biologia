@@ -1,0 +1,1109 @@
+# Plano de evolução — pipeline genérico multi-edição
+
+## 1. Objetivo
+
+Reduzir a dependência de código específico por área e da IA para análises mecânicas, sem reescrever o núcleo estatístico já validado.
+
+A primeira implementação multi-edição usará Enade 2017 + Ciências Biológicas — Bacharelado (`CO_GRUPO=1601`) como piloto.
+
+## 2. Princípio de desenho
+
+Separar três níveis:
+
+```text
+EDIÇÃO
+  define schema oficial, instrumento e capacidades
+
+ÁREA
+  define CO_GRUPO, nome, grau e IES focal
+
+NÚCLEO
+  agrega, valida, compara e produz evidências
+```
+
+O núcleo não deve conhecer números de questões específicos de 2017 ou 2025 quando isso puder ser expresso pelo schema/configuração da edição.
+
+## 3. Estrutura-alvo sugerida
+
+A implementação pode ajustar nomes após inspeção do repositório, mas a separação conceitual deve ser preservada.
+
+Exemplo:
+
+```text
+src/
+├── core/
+├── edicoes/
+│   ├── base.py
+│   ├── enade_2017.py
+│   └── enade_2025_licenciaturas.py
+├── instrumento/
+│   ├── questionario.py
+│   └── dicionario.py
+├── agregacao/
+├── analise/
+├── evidencias/
+│   ├── construir.py
+│   ├── alertas.py
+│   └── validar.py
+├── visualizacao/
+└── relatorios/
+```
+
+Alternativamente, parte do schema pode ser declarativa em YAML. Não criar abstrações apenas por estética; manter a solução pequena e testável.
+
+## 4. Fase 0 — baseline antes de alterar
+
+Antes de implementar:
+
+1. `git status` e branch atual;
+2. `python -m pytest -q`;
+3. `python -m ruff check .`;
+4. registrar comportamento atual de `python executar.py --listar`;
+5. identificar testes que protegem 2025;
+6. não editar fontes em `dados_brutos/`.
+
+Se a árvore já estiver suja, não apagar alterações do usuário.
+
+## 5. Fase 1 — configuração/contrato da edição
+
+**Implementada no escopo declarativo inicial.** Os contratos de 2017 e 2025 estão separados em `src/edicoes/`, e as áreas são resolvidas pela edição e pelo slug. A implementação também separa capacidade da edição de aplicabilidade da área/grau e define valor original, faixa numérica anulável e situação como campos distintos do Conceito Enade.
+
+Criar uma representação explícita de edição com, no mínimo:
+
+```text
+ano
+prefixo_arquivos
+quantidade_arquivos
+separador
+decimal
+encoding(s)
+schema_arq1
+schema_arq2
+schema_desempenho
+mapa_presenca
+questionario_geral
+processo_formativo
+questionario_licenciatura
+capacidades
+schema_conceito
+```
+
+Capacidades são preferíveis a condicionais espalhadas. Exemplo:
+
+```text
+supports_proficiencia = false
+supports_recomendacao = false
+supports_itens_licenciatura = true/false conforme grau
+```
+
+Na implementação, `supports_itens_licenciatura` é capacidade da edição. A utilização efetiva é uma propriedade independente da configuração da área/grau. O bacharelado 1601 em 2017, por exemplo, não aplica esse bloco embora a edição o ofereça.
+
+Permanecem para as fases seguintes a leitura dirigida pelo contrato, os adapters dos agregadores, o loader multi-edição do Conceito Enade, a orquestração genérica e o teste end-to-end do piloto.
+
+## 6. Fase 2 — inventário e carregamento
+
+**Implementada como infraestrutura de leitura.** O inventário valida ZIP ou diretório extraído conforme o contrato da edição. A leitura aceita o TXT diretamente do ZIP, valida o schema, lê apenas colunas solicitadas, usa o `chunksize` de `config.yaml` e filtra cada bloco por `CO_GRUPO` no `arq1` ou por `CO_CURSO` nos demais arquivos. O recorte 1601 foi verificado na fonte local de 2017. A integração desse leitor aos agregadores e a agregação nacional em streaming são decisões das fases analíticas seguintes.
+
+Generalizar o inventário que hoje está acoplado ao prefixo 2025.
+
+Implementar leitura filtrada eficiente para arquivos grandes. O `chunksize` já aparece em configuração histórica; a nova implementação deve efetivamente usá-lo quando apropriado.
+
+Fluxo desejado:
+
+```text
+ler chunk
+→ normalizar apenas colunas necessárias
+→ filtrar CO_CURSO/CO_GRUPO
+→ acumular subset
+→ próximo chunk
+```
+
+Não carregar centenas de milhares de linhas inteiras quando o objetivo é uma única área, salvo justificativa de benchmark nacional que exija o universo.
+
+Quando o universo nacional for necessário, ainda preferir agregação streaming/chunked quando possível.
+
+## 7. Fase 3 — desempenho por edição
+
+**Implementada como agregador por curso dirigido pelo contrato.** O novo agregador lê somente o `arq3`, mapeia os componentes disponíveis para nomes canônicos e preserva as variáveis oficiais na tabela individual de auditoria. As estatísticas de notas usam apenas registros com o código de presença válida declarado pela edição; os denominadores, ausências e notas fora dessa situação são explicitados por curso. O agregador legado de 2025 permanece disponível até a migração da orquestração.
+
+Não forçar um schema único que destrua a semântica original.
+
+Criar um contrato canônico capaz de representar componentes opcionais, por exemplo:
+
+```text
+geral
+formacao_geral.objetiva
+formacao_geral.discursiva
+formacao_geral.total
+componente_especifico.objetiva
+componente_especifico.discursiva
+componente_especifico.total
+proficiencia (opcional)
+acertos (opcional)
+```
+
+O adapter 2017 mapeia `NT_*_FG` e `NT_*_CE` para esses campos conceituais.
+
+O adapter 2025 mapeia somente o que a edição realmente fornece.
+
+## 8. Fase 4 — questionário e indicadores derivados
+
+**Implementada para os indicadores declarados nos contratos de 2017 e 2025.** O agregador lê cada item geral no seu arquivo oficial, normaliza e classifica as respostas segundo regras da edição, agrega por `CO_CURSO` e entrega percentuais, denominadores e contagens de ausentes, excluídos, não aplicáveis e inválidos. A resposta de múltipla escolha de `QE_I16` em 2025 aceita combinações de bolsas e rejeita combinações contraditórias com `A = nenhuma`. Regras e proveniência são retornadas para auditoria. O cálculo legado de 2025 permanece durante a migração da orquestração.
+
+Separar:
+
+```text
+texto/código oficial da pergunta
+```
+
+de:
+
+```text
+indicador derivado do projeto
+```
+
+Exemplo:
+
+```text
+2017 QE_I21 = alguém na família concluiu superior
+→ indicador derivado: primeira_geracao
+```
+
+Cada indicador derivado deve declarar:
+
+- edição;
+- item de origem;
+- categorias incluídas/excluídas;
+- denominador válido;
+- tratamento de ausentes/não se aplica;
+- rótulo final;
+- teste unitário.
+
+Não compartilhar indicador entre edições apenas porque o nome final é igual.
+
+## 9. Fase 5 — processo formativo
+
+**Motor por item implementado; dimensões ainda não definidas.** O agregador multi-edição lê os itens declarados no contrato da edição, classifica códigos 1–6, 7/8, ausências e respostas inválidas, e retorna estatísticas e denominadores por `CO_CURSO` e item. A direção da escala e os códigos de concordância ficam no contrato. O novo caminho não calcula alfa ou média global do bloco. A análise de dimensões depende de leitura e justificativa item a item, além das verificações abaixo.
+
+O diagnóstico legado exploratório de 2025 também exclui 7/8 e respostas fora da escala do alfa e do número de casos completos. Seus agrupamentos candidatos não foram validados e não são índices; a matriz teórica permanece pendente, sem bloquear a Fase 6.
+
+Ressalva da fonte: o questionário 2025 contém `QE_I67`, mas nenhum arquivo temático do ZIP público disponível traz essa coluna. O contrato usa `QE_I20–QE_I66` e não inventa respostas para `QE_I67`.
+
+O motor estatístico deve aceitar lista/configuração de itens e códigos especiais.
+
+Antes de construir dimensões:
+
+1. ler rótulos oficiais;
+2. verificar direção da escala;
+3. definir teoria da dimensão;
+4. avaliar consistência interna;
+5. documentar itens excluídos;
+6. não criar média global única sem validação.
+
+Dimensões de 2025 não devem ser transplantadas automaticamente para 2017.
+
+## 10. Fase 6 — Conceito Enade
+
+**Implementada no carregamento independente da orquestração.** O schema da edição declara aba e correspondências de colunas. O loader entrega ofertas normalizadas, tabela original e proveniência, valida `CO_CURSO` único e mantém `SC`/ausente fora da faixa numérica. A ligação com a CLI de área permanece para a Fase 7.
+
+Criar loader/adaptador por fonte/edição que normalize para campos canônicos, por exemplo:
+
+```text
+NU_ANO
+CO_GRUPO
+CO_IES
+CO_CURSO
+CO_MUNIC_CURSO
+modalidade
+inscritos_oficiais
+participantes_oficiais
+conceito_continuo
+conceito_faixa
+situacao_conceito
+observacao_conceito
+```
+
+Manter a fonte original disponível para auditoria.
+
+`SC`/ausente nunca vira 1.
+
+## 11. Fase 7 — pipeline genérico de área
+
+**Orquestração descritiva implementada.** A CLI por edição/slug e fontes explícitas caracteriza cursos pelo `arq1`, reconcilia a planilha de Conceito e combina somente agregados one-to-one de desempenho, indicadores gerais e processo formativo. Os CSVs de validação e análise ficam separados. A Fase 8 acrescenta o pacote de evidências; comparações e benchmarks ficam para a Fase 9A. A saída ainda não é o relatório final.
+
+Depois que os adapters estiverem estáveis, criar uma orquestração genérica.
+
+Exemplo conceitual de CLI:
+
+```powershell
+python executar.py area --ano 2017 --grupo 1601 --etapa validacao
+python executar.py area --ano 2017 --grupo 1601 --etapa analise
+python executar.py area --ano 2017 --grupo 1601 --etapa tudo
+```
+
+A sintaxe final deve respeitar o estilo atual do repositório; não é obrigatório usar exatamente esses argumentos.
+
+## 12. Fase 8 — pacote de evidências
+
+**Aprovada após auditoria corretiva; alterações locais para revisão.** A etapa analítica da CLI gera `evidencias.json` schema `2.0`, ao lado dos CSVs auditáveis. O pacote contém proveniência, cobertura, ofertas focais, participação, desempenho, perfil e processo formativo. A validação rejeita blocos obrigatórios ausentes, cursos inexistentes, chaves duplicadas, contagens/denominadores incompatíveis e proporções inválidas. O manifesto deriva das origens dos produtos, com tamanho e SHA256 dos TXT efetivamente utilizados em ZIP ou diretório. A publicação usa staging, conferência JSON/CSVs e rollback da troca de diretório em caso de falha. Ver `AUDITORIA_FASE_8.md`, `EXECUCAO.md` e `METODOLOGIA.md` para evidências, contrato e limites operacionais. Benchmark, efeitos, associações ecológicas e alertas permanecem explicitamente indisponíveis.
+
+Gerar `evidencias.json` a partir de produtos já validados.
+
+O pacote deve registrar também proveniência:
+
+```text
+fonte
+edição
+arquivo/variável de origem
+N válido
+ausências
+regra de cálculo
+versão do schema
+```
+
+No bloco de processo formativo, preservar por curso e item `n_total`, `n_valido`, as contagens e os percentuais separados de "não sei responder" e "não se aplica", com denominador `n_total`. O relatório final deve exibir esses percentuais junto aos respectivos N; não apresentar concordância sem seu denominador válido.
+
+Não permitir números hardcoded em geradores de relatório quando eles já existem no pacote/CSV validado.
+
+## 13. Fase 9 — pré-requisitos analíticos e motor de alertas
+
+**Planejada, não iniciada.** A divisão explicita dependências antes implícitas entre a orquestração e os alertas.
+
+### Fase 9A — contraste focal, benchmarks e efeitos/incerteza
+
+Formalizar a pergunta e o contraste focal; definir universos amplo e comparável, critérios de inclusão/exclusão, pesos, N válidos, estimandos, medidas de efeito e incerteza. Integrar essas estruturas somente após contratos e testes próprios. O piloto de 2017 possui Conceito 3: não fabricar Grupo A de Conceito 1. Dimensões do processo continuam dependentes da matriz teórica.
+
+### Fase 9B — motor de alertas mecânicos
+
+Consumir resultados validados da Fase 9A. Mudanças de sinal entre benchmarks, IC incluindo zero e sensibilidade a benchmark/outlier dependem de contrastes, estimativas e análises de sensibilidade disponíveis. Ausência de estrutura deve ser explicitada, nunca convertida em resultado favorável.
+
+O código pode automatizar triagem mecânica, não conclusões substantivas.
+
+Exemplos adequados:
+
+```text
+N benchmark pequeno
+alta taxa de ausência
+mudança de sinal entre benchmarks
+IC inclui zero
+consistência interna limitada
+resultado sensível a outliers
+```
+
+Exemplos inadequados para regra automática:
+
+```text
+"infraestrutura explica o conceito"
+"EaD causou baixo desempenho"
+"o curso tem fragilidade pedagógica"
+```
+
+## 14. Fase 10 — teste end-to-end permanente
+
+A política de aposentadoria remove testes específicos de áreas. Para o pipeline genérico, criar pelo menos um teste end-to-end que permaneça no núcleo.
+
+Usar Ciências Biológicas — Bacharelado 2017 como smoke/regressão quando as fontes reais estiverem disponíveis localmente.
+
+Expectativas preliminares do piloto UFPA:
+
+```text
+CO_CURSO=12027
+inscritos=23
+participantes=13
+conceito=3
+```
+
+Esses valores não entram na lógica de produção.
+
+Para 2025, snapshots/tags de Música e Educação Física podem servir como referência de regressão ao promover funcionalidades compartilhadas.
+
+## 15. Definition of Done da primeira entrega multi-edição
+
+A primeira entrega técnica não é o relatório de Biologia. É a infraestrutura mínima confiável.
+
+Considerar pronta quando:
+
+- 2017 e 2025 possuem schemas/adapters explicitamente separados;
+- nenhum mapeamento socioeconômico 2025 é aplicado silenciosamente a 2017;
+- o desempenho 2017 preserva FG/CE;
+- o processo formativo 2017 usa o instrumento correto;
+- conceito 2017 é carregado e `SC` preservado;
+- o piloto 1601 produz base agregada por curso sem joins individuais;
+- as reconciliações oficiais do curso UFPA passam;
+- testes novos protegem os contratos;
+- testes existentes permanecem verdes;
+- Ruff permanece verde;
+- documentação é atualizada junto com o código.
+
+## 16. Entrega piloto — Ciências Biológicas — Bacharelado 2017
+
+Esta etapa **não constitui uma Fase 11 do pipeline**. A infraestrutura genérica termina na Fase 10. A partir daí, o objetivo é utilizar o pipeline validado para produzir, auditar e entregar o relatório técnico-científico da área piloto.
+
+A entrega só deve ser iniciada depois de:
+
+- Fase 9A aprovada;
+- Fase 9B aprovada;
+- Fase 10 aprovada;
+- suíte completa de testes verde;
+- `ruff check .` verde;
+- código do pipeline congelado para a execução de entrega.
+
+O relatório piloto é de:
+
+```text
+Edição: Enade 2017
+Área: Ciências Biológicas — Bacharelado
+CO_GRUPO: 1601
+IES focal: UFPA
+CO_IES: 569
+Oferta focal de regressão: CO_CURSO=12027
+```
+
+A oferta focal possui Conceito Enade 3. Não fabricar Grupo A de Conceito 1.
+
+### 16.1. Etapa A — execução definitiva da área
+
+Executar o pipeline completo de Ciências Biológicas — Bacharelado 2017 usando as fontes oficiais e a versão congelada do código.
+
+A execução definitiva deve:
+
+1. validar inventário e fontes;
+2. caracterizar o universo da área;
+3. reconciliar a planilha de Conceito Enade;
+4. executar agregações temáticas;
+5. executar contrastes e benchmarks implementados na Fase 9A;
+6. executar efeitos/incerteza e análises de sensibilidade disponíveis;
+7. executar alertas mecânicos implementados na Fase 9B;
+8. gerar `evidencias.json`;
+9. gerar CSVs auditáveis;
+10. registrar proveniência;
+11. validar integralmente o conjunto antes da publicação.
+
+Valores de regressão da oferta focal:
+
+```text
+CO_CURSO = 12027
+inscritos oficiais = 23
+participantes oficiais = 13
+Conceito Enade = 3
+```
+
+Esses valores servem apenas para regressão e reconciliação. Não podem ser hardcoded em lógica analítica ou textual.
+
+Após a execução bem-sucedida, os artefatos dessa geração devem ser tratados como a **fonte oficial da entrega**.
+
+Não recalcular manualmente valores durante a redação.
+
+### 16.2. Etapa B — congelamento dos artefatos de entrega
+
+Preservar conjuntamente, no diretório de entrega da área:
+
+```text
+evidencias.json
+CSVs de validação
+CSVs analíticos
+manifestos/proveniência
+tabelas finais
+figuras finais
+relatório em Markdown
+relatório em DOCX
+PDF, quando a conversão estiver disponível
+```
+
+Registrar:
+
+- commit do código utilizado;
+- data da execução;
+- edição;
+- área;
+- fontes e hashes;
+- schema do pacote de evidências;
+- quantidade de cursos;
+- identificadores da oferta focal;
+- resultados dos testes executados antes da geração.
+
+O relatório, as figuras e as tabelas devem ser rastreáveis até essa mesma geração.
+
+### 16.3. Etapa C — geração das tabelas finais
+
+Gerar tabelas exclusivamente a partir dos produtos validados.
+
+As tabelas devem informar, quando aplicável:
+
+- indicador;
+- curso/grupo/recorte;
+- unidade;
+- N válido;
+- inscritos e participantes oficiais quando pertinentes;
+- medida central;
+- dispersão;
+- diferença ou efeito;
+- intervalo de incerteza;
+- ausências;
+- modalidade;
+- fonte;
+- observações metodológicas necessárias.
+
+Não misturar conceitos distintos de N.
+
+Distinguir explicitamente:
+
+```text
+inscritos oficiais
+participantes oficiais
+registros nos microdados
+presentes válidos
+N válido do indicador
+N de cursos do benchmark
+```
+
+Não apresentar Conceito ausente/SC como Conceito 1.
+
+### 16.4. Etapa D — geração das figuras finais
+
+Construir uma narrativa gráfica coerente com a pergunta substantiva do piloto.
+
+A sequência mínima recomendada é:
+
+1. panorama/localização das ofertas da UFPA e universo da área;
+2. posição relativa da oferta focal;
+3. distribuição e comparação de desempenho;
+4. perfil demográfico e socioeconômico;
+5. trajetória e condições acadêmicas;
+6. processo formativo;
+7. contraste com benchmark amplo;
+8. contraste com benchmark comparável;
+9. síntese dos efeitos/incerteza;
+10. alertas e sensibilidades relevantes, sem transformar alertas mecânicos em conclusões substantivas.
+
+Usar, conforme adequação e N:
+
+- dotplots;
+- boxplots;
+- ECDF;
+- barras percentuais;
+- heatmaps;
+- gráficos Likert;
+- interval plots/forest plots para efeitos e incerteza;
+- histogramas apenas quando o N justificar.
+
+Todo gráfico deve permitir recuperar:
+
+- variável;
+- unidade de análise;
+- grupo/recorte;
+- modalidade, quando pertinente;
+- N válido;
+- exclusões;
+- tratamento de ausências;
+- fonte;
+- edição;
+- área.
+
+Não criar visualização decorativa sem função analítica.
+
+### 16.5. Etapa E — redação do relatório técnico-científico
+
+O relatório deve ser produzido a partir dos produtos congelados da execução definitiva.
+
+Estrutura-base:
+
+```text
+Elementos pré-textuais
+1. Introdução
+2. Referencial institucional e metodológico
+3. Metodologia
+4. Panorama da área
+5. Resultados
+   5.1 Desempenho
+   5.2 Perfil demográfico e socioeconômico
+   5.3 Trajetória e condições acadêmicas
+   5.4 Processo formativo
+   5.5 Recomendação, somente se disponível no contrato da edição
+   5.6 Benchmark comparável
+   5.7 Associações ecológicas, somente se implementadas e validadas
+   5.8 Comparações regionais e nacionais
+   5.9 Estudo focal da UFPA
+6. Discussão
+7. Conclusão
+Referências
+Apêndices
+Anexos, quando necessários
+```
+
+Para 2017, não fabricar a seção de recomendação caso a capacidade permaneça indisponível no contrato.
+
+Cada resultado deve distinguir explicitamente:
+
+- **descrição** — o que os dados mostram;
+- **interpretação** — leitura substantiva compatível com o desenho;
+- **hipótese** — explicação possível, não demonstrada causalmente;
+- **limitação** — restrição de dados, N, comparabilidade ou desenho.
+
+São proibidas formulações causais não sustentadas.
+
+Não escrever que modalidade, interiorização, perfil socioeconômico, infraestrutura ou qualquer outro fator "explica" o Conceito Enade sem desenho causal.
+
+### 16.6. Pergunta substantiva do piloto
+
+Como a oferta focal da UFPA possui Conceito 3, a pergunta não deve ser formulada como comparação de uma oferta UFPA Conceito 1.
+
+A formulação deve ser adaptada ao desenho focal, por exemplo:
+
+> Quais características de desempenho, composição discente, trajetória acadêmica e avaliação do processo formativo caracterizam a oferta de Ciências Biológicas — Bacharelado da UFPA no Enade 2017, e como ela se posiciona diante das demais ofertas da mesma área no Pará, na Região Norte, no Brasil e diante de benchmarks estruturalmente comparáveis?
+
+A redação final pode ser refinada antes da execução, desde que preserve:
+
+- foco na oferta UFPA;
+- comparação exclusivamente com a mesma área;
+- distinção entre benchmark amplo e comparável;
+- natureza descritiva/associativa;
+- ausência de inferência causal individual.
+
+### 16.7. Etapa F — auditoria quantitativa do relatório
+
+Antes da entrega, auditar todas as afirmações quantitativas do relatório contra:
+
+```text
+evidencias.json
+CSVs auditáveis
+tabelas finais
+dados utilizados nas figuras
+```
+
+A auditoria deve identificar automaticamente ou por conferência estruturada:
+
+- número citado no texto sem origem;
+- diferença entre texto e tabela;
+- diferença entre tabela e `evidencias.json`;
+- diferença entre figura e base correspondente;
+- N divergente;
+- percentual sem denominador compatível;
+- arredondamento inconsistente;
+- Conceito Enade divergente;
+- benchmark diferente do contrato;
+- efeito/IC divergente da base;
+- curso referenciado fora do universo;
+- interpretação de SC como Conceito 1;
+- bloco indisponível descrito como resultado observado.
+
+Toda divergência quantitativa é bloqueadora da entrega até ser resolvida.
+
+### 16.8. Etapa G — auditoria metodológica e textual
+
+Revisar o relatório final para verificar:
+
+- nenhuma junção individual foi sugerida no texto;
+- relações entre temas de arquivos distintos são apresentadas no nível do curso;
+- correlações ecológicas são identificadas como ecológicas;
+- falácia ecológica é explicitada quando pertinente;
+- benchmarks sobrepostos não são usados como grupos independentes em testes;
+- benchmark comparável possui critérios descritos;
+- N pequenos recebem cautela interpretativa;
+- ausências são informadas;
+- não existe causalidade indevida;
+- indicadores indisponíveis não são fabricados;
+- itens e escalas são descritos conforme a edição 2017;
+- Formação Geral e Componente Específico permanecem semanticamente separados;
+- referências citadas existem e foram efetivamente utilizadas;
+- tabelas e figuras estão numeradas, tituladas e referenciadas no texto;
+- a conclusão responde à pergunta substantiva sem ultrapassar os dados.
+
+### 16.9. Etapa H — produtos finais
+
+A entrega piloto deverá produzir, no mínimo:
+
+```text
+relatorio_ciencias_biologicas_bacharelado_enade_2017_ufpa.md
+relatorio_ciencias_biologicas_bacharelado_enade_2017_ufpa.docx
+```
+
+Quando o ambiente permitir conversão confiável:
+
+```text
+relatorio_ciencias_biologicas_bacharelado_enade_2017_ufpa.pdf
+```
+
+Além disso:
+
+```text
+tabelas/
+figuras/
+evidencias.json
+CSVs auditáveis
+manifesto/proveniência
+relatorio_auditoria_entrega.md
+```
+
+A ausência de PDF por indisponibilidade da ferramenta de conversão não invalida Markdown/DOCX, desde que isso seja explicitado.
+
+### 16.10. Critérios de aceite da entrega piloto
+
+A entrega de Ciências Biológicas — Bacharelado 2017 só pode ser considerada pronta quando:
+
+1. Fases 9A, 9B e 10 estiverem aprovadas;
+2. execução definitiva usar o código congelado;
+3. fontes oficiais estiverem registradas e preservadas;
+4. oferta focal reconciliar 23 inscritos, 13 participantes e Conceito 3;
+5. nenhum valor de regressão estiver hardcoded na produção;
+6. `evidencias.json` estiver válido;
+7. CSVs e JSON pertencerem à mesma geração;
+8. tabelas derivarem dos produtos validados;
+9. figuras derivarem dos produtos validados;
+10. todos os N e percentuais forem rastreáveis;
+11. benchmark amplo estiver identificado;
+12. benchmark comparável estiver documentado;
+13. efeitos/incerteza usados no relatório corresponderem à Fase 9A;
+14. alertas não forem convertidos automaticamente em conclusões;
+15. itens indisponíveis não forem fabricados;
+16. nenhuma relação individual entre arquivos temáticos for criada ou insinuada;
+17. texto, tabelas e figuras passarem pela auditoria quantitativa;
+18. relatório passar pela auditoria metodológica;
+19. referências forem verificáveis;
+20. Markdown e DOCX finais forem produzidos;
+21. PDF for produzido quando a ferramenta estiver disponível;
+22. relatório de auditoria da entrega não possuir bloqueadores;
+23. estado Git e commit da execução estiverem registrados.
+
+---
+
+## 17. Prompt operacional — gerar e auditar a entrega piloto de Ciências Biológicas 2017
+
+Usar o prompt abaixo somente depois de a Fase 10 estar aprovada.
+
+```text
+Você está trabalhando no repositório do projeto de análise dos Microdados do Enade.
+
+OBJETIVO DESTA TAREFA
+
+Produzir a entrega técnico-científica final do piloto:
+
+- Enade 2017;
+- Ciências Biológicas — Bacharelado;
+- CO_GRUPO=1601;
+- IES focal: UFPA;
+- CO_IES=569;
+- oferta focal de regressão: CO_CURSO=12027.
+
+Esta tarefa começa SOMENTE após as Fases 9A, 9B e 10 estarem concluídas e validadas.
+
+Não implemente novas capacidades analíticas durante a produção do relatório, salvo correção de bug impeditivo objetivamente demonstrado.
+
+Se encontrar um bug impeditivo:
+1. documente;
+2. interrompa a geração do relatório;
+3. corrija apenas se a correção pertencer ao contrato já aprovado;
+4. execute novamente a suíte relevante e completa;
+5. somente então reinicie a execução definitiva.
+
+Não altere arquivos em dados_brutos/.
+
+==================================================
+1. BASELINE E CONGELAMENTO
+==================================================
+
+Antes de gerar qualquer produto:
+
+- execute `git status`;
+- execute `git branch --show-current`;
+- execute `git log -1 --oneline`;
+- registre branch e commit;
+- confirme árvore limpa ou documente alterações;
+- execute a suíte completa;
+- execute testes de integração;
+- execute `python -m ruff check .`.
+
+Confirme que Fases 9A, 9B e 10 estão aprovadas na documentação.
+
+Se houver bloqueador, NÃO produza o relatório.
+
+A partir da aprovação, trate o commit corrente como a versão congelada utilizada na entrega.
+
+==================================================
+2. EXECUÇÃO DEFINITIVA
+==================================================
+
+Execute a CLI real para Ciências Biológicas — Bacharelado 2017 usando as fontes oficiais.
+
+A execução deve passar por todo o pipeline validado e produzir os artefatos definitivos.
+
+Confirme a oferta focal:
+
+CO_CURSO=12027
+CO_IES=569
+CO_GRUPO=1601
+
+Expectativas de regressão:
+
+inscritos oficiais=23
+participantes oficiais=13
+Conceito Enade=3
+
+Esses valores são somente expectativas de teste. Não hardcode nenhum deles na lógica de produção.
+
+Se houver divergência, não continue silenciosamente. Audite a fonte e determine a causa.
+
+Confirme também que:
+
+- FG e CE continuam separados;
+- processo formativo usa QE_I27–QE_I68;
+- questionário específico de licenciaturas não é aplicado ao bacharelado;
+- recomendação de 2025 não é fabricada;
+- proficiência de 2025 não é fabricada;
+- SC nunca é transformado em Conceito 1;
+- nenhuma junção individual entre arquivos é realizada;
+- todos os produtos integrados possuem uma linha por CO_CURSO antes das junções.
+
+==================================================
+3. CONGELAMENTO DOS ARTEFATOS
+==================================================
+
+Após uma execução válida, trate essa geração como a fonte oficial da entrega.
+
+Preserve conjuntamente:
+
+- evidencias.json;
+- CSVs de validação;
+- CSVs analíticos;
+- proveniência;
+- manifestos;
+- resultados de benchmarks;
+- efeitos/incerteza;
+- alertas;
+- bases utilizadas nas figuras.
+
+Não recalcular valores manualmente durante a redação.
+
+Não misturar artefatos de execuções diferentes.
+
+==================================================
+4. PERGUNTA SUBSTANTIVA
+==================================================
+
+A oferta focal possui Conceito Enade 3.
+
+NÃO formule a análise como estudo de uma oferta UFPA Conceito 1.
+
+Utilize como pergunta orientadora:
+
+“Quais características de desempenho, composição discente, trajetória acadêmica e avaliação do processo formativo caracterizam a oferta de Ciências Biológicas — Bacharelado da UFPA no Enade 2017, e como ela se posiciona diante das demais ofertas da mesma área no Pará, na Região Norte, no Brasil e diante de benchmarks estruturalmente comparáveis?”
+
+A pergunta pode receber ajuste estilístico, mas não metodológico.
+
+==================================================
+5. ANÁLISES
+==================================================
+
+Produza a análise final usando somente capacidades validadas no pipeline.
+
+Organize, conforme disponibilidade, em:
+
+A. Panorama da área e da oferta focal
+B. Participação
+C. Desempenho
+D. Perfil demográfico e socioeconômico
+E. Trajetória e condições acadêmicas
+F. Processo formativo
+G. Benchmark amplo
+H. Benchmark comparável
+I. Efeitos e incerteza
+J. Análises de sensibilidade
+K. Associações ecológicas, somente se implementadas e validadas
+L. Alertas mecânicos
+M. Síntese do estudo focal
+
+Para cada resultado:
+
+- apresente N;
+- apresente denominador;
+- apresente dispersão quando aplicável;
+- apresente ausências;
+- identifique o grupo/benchmark;
+- diferencie descrição, interpretação, hipótese e limitação.
+
+Não transforme associação em causalidade.
+
+Não transforme alerta mecânico em conclusão substantiva.
+
+Não compare notas brutas de áreas diferentes.
+
+==================================================
+6. TABELAS
+==================================================
+
+Gere tabelas finais rastreáveis até os CSVs/evidencias.json.
+
+Cada tabela deve informar, conforme aplicável:
+
+- indicador;
+- curso/grupo;
+- modalidade;
+- N válido;
+- medida central;
+- dispersão;
+- percentual e denominador;
+- efeito;
+- incerteza;
+- ausências;
+- fonte.
+
+Distinguir:
+
+inscritos oficiais
+participantes oficiais
+registros nos microdados
+presentes válidos
+N válido do indicador
+N de cursos do benchmark
+
+Não usar “N” genericamente quando as bases forem diferentes.
+
+==================================================
+7. FIGURAS
+==================================================
+
+Gere uma narrativa gráfica adequada à pergunta.
+
+Priorize:
+
+- dotplots;
+- boxplots;
+- ECDF;
+- barras percentuais;
+- heatmaps;
+- Likert;
+- interval/forest plots para efeitos.
+
+Histogramas apenas com N adequado.
+
+Cada figura deve permitir recuperar:
+
+- variável;
+- nível de análise;
+- recorte;
+- modalidade;
+- N válido;
+- exclusões;
+- tratamento de ausências;
+- fonte.
+
+Depois de gerar cada figura, produza também uma ficha analítica contendo:
+
+- descrição;
+- interpretação;
+- hipótese;
+- limitação;
+- relação com a pergunta central.
+
+==================================================
+8. RELATÓRIO TÉCNICO-CIENTÍFICO
+==================================================
+
+Produza inicialmente uma versão auditável em Markdown.
+
+Estrutura:
+
+- elementos pré-textuais;
+- Introdução;
+- Referencial institucional e metodológico;
+- Metodologia;
+- Panorama da área;
+- Resultados;
+  - Desempenho;
+  - Perfil demográfico e socioeconômico;
+  - Trajetória e condições acadêmicas;
+  - Processo formativo;
+  - Recomendação somente se a edição realmente oferecer capacidade aplicável;
+  - Benchmark comparável;
+  - Associações ecológicas somente se validadas;
+  - Comparações regionais/nacionais;
+  - Estudo focal UFPA;
+- Discussão;
+- Conclusão;
+- Referências;
+- Apêndices;
+- Anexos quando necessários.
+
+Aplicar as regras ABNT vigentes adotadas pelo projeto.
+
+Não inventar referências.
+
+Somente incluir referência realmente utilizada.
+
+==================================================
+9. REGRAS DE REDAÇÃO
+==================================================
+
+Toda conclusão substantiva deve ser rastreável aos produtos congelados.
+
+Não escrever, sem desenho causal:
+
+- “EaD causou...”
+- “infraestrutura explica...”
+- “perfil socioeconômico determinou...”
+- “o curso possui fragilidade pedagógica porque...”
+
+Prefira:
+
+- “observa-se associação...”
+- “o padrão é compatível com...”
+- “os dados sugerem...”
+- “uma hipótese a investigar é...”
+
+Identifique explicitamente a falácia ecológica quando relacionar indicadores agregados de temas diferentes.
+
+==================================================
+10. AUDITORIA QUANTITATIVA
+==================================================
+
+Após gerar o Markdown, audite todos os números citados no relatório.
+
+Confronte:
+
+texto
+↔ tabelas
+↔ figuras
+↔ evidencias.json
+↔ CSVs
+
+Procure:
+
+- número sem origem;
+- número divergente;
+- N divergente;
+- percentual incompatível com denominador;
+- arredondamento inconsistente;
+- conceito divergente;
+- efeito/IC divergente;
+- benchmark diferente do contrato;
+- curso fora do universo;
+- SC interpretado como Conceito 1;
+- resultado descrito apesar de capacidade indisponível.
+
+Toda divergência é bloqueadora.
+
+==================================================
+11. AUDITORIA METODOLÓGICA
+==================================================
+
+Confirme que:
+
+- CO_CURSO é a unidade integrada;
+- nenhuma reconstrução individual foi realizada;
+- nenhuma associação individual entre arquivos foi inferida;
+- correlações entre temas distintos são ecológicas;
+- benchmarks independentes não se sobrepõem;
+- benchmark comparável possui critérios explícitos;
+- N pequenos recebem cautela;
+- ausências aparecem;
+- limitações aparecem;
+- itens 2017 têm semântica 2017;
+- FG e CE permanecem separados;
+- capacidade indisponível permanece indisponível;
+- o piloto não foi artificialmente convertido em Conceito 1.
+
+==================================================
+12. APROFUNDAMENTOS
+==================================================
+
+Ao final do relatório, proponha de 3 a 5 aprofundamentos futuros.
+
+Para cada um informe:
+
+- justificativa;
+- pergunta;
+- variáveis;
+- método;
+- limitações.
+
+NÃO execute esses aprofundamentos nesta tarefa.
+
+==================================================
+13. FORMATOS DE SAÍDA
+==================================================
+
+Produza:
+
+1. Markdown auditável;
+2. DOCX final;
+3. PDF quando a ferramenta de conversão estiver disponível;
+4. pasta de tabelas;
+5. pasta de figuras;
+6. relatório de auditoria da entrega.
+
+O DOCX deve seguir a formatação técnica adotada pelo projeto:
+
+- margens superior/esquerda 3 cm;
+- margens inferior/direita 2 cm;
+- Arial 12 no corpo;
+- texto justificado;
+- espaçamento 1,5;
+- elementos auxiliares em corpo menor/espaçamento simples quando pertinente.
+
+==================================================
+14. RELATÓRIO DE AUDITORIA DA ENTREGA
+==================================================
+
+Crie `relatorio_auditoria_entrega.md` contendo:
+
+A. branch e commit;
+B. fontes e hashes;
+C. resultados dos testes;
+D. execução definitiva;
+E. reconciliação da oferta focal;
+F. quantidade de cursos;
+G. artefatos produzidos;
+H. auditoria de tabelas;
+I. auditoria de figuras;
+J. auditoria dos números citados;
+K. auditoria metodológica;
+L. referências verificadas;
+M. limitações;
+N. divergências corrigidas;
+O. divergências pendentes;
+P. veredito.
+
+O veredito deve ser apenas:
+
+ENTREGA APROVADA
+
+ou:
+
+ENTREGA BLOQUEADA
+
+Se bloqueada, liste os bloqueadores.
+
+==================================================
+15. NÃO FAZER
+==================================================
+
+- não iniciar nova fase do pipeline;
+- não ampliar o escopo metodológico;
+- não criar índice de processo formativo sem validação;
+- não fabricar recomendação;
+- não hardcode números;
+- não juntar indivíduos entre arquivos;
+- não usar posição da linha como chave;
+- não criar causalidade;
+- não esconder N pequeno;
+- não ocultar ausências;
+- não alterar dados brutos;
+- não fazer commit ou push automaticamente.
+
+Ao final, deixe todos os produtos prontos para revisão humana.
+```
+
+---
+
+## 18. Encerramento do piloto e promoção do conhecimento
+
+Depois de a entrega ser aprovada:
+
+1. registrar commit/tag ou snapshot reprodutível do estado que produziu o relatório;
+2. preservar `evidencias.json`, CSVs, tabelas, figuras, relatório e auditoria;
+3. documentar qualquer melhoria geral descoberta durante o piloto;
+4. melhorias generalizáveis devem ser promovidas ao núcleo antes de aposentadoria de código específico;
+5. não manter lógica exclusiva da área no núcleo quando a diferença puder ser expressa como configuração;
+6. não apagar conhecimento metodológico necessário para reproduzir a entrega.
+
+A conclusão do relatório de Ciências Biológicas — Bacharelado 2017 valida o uso do pipeline genérico em uma entrega real, mas não elimina a necessidade de auditoria específica das próximas áreas e edições.
