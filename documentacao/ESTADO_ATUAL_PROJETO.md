@@ -4,6 +4,7 @@
 
 - Branch operacional: `feature/pipeline-multiedicao`.
 - Commit-base desta implementação: `b93a020be1a27e2ac7a8e69c9b9046623e1889a8`.
+- Commit de fechamento da Fase 9A: `bd8b45cbd6ad444d2a714028c6642002a6af216b`.
 - Confirme o hash atual com `git log -1 --oneline`; este documento não substitui o estado do Git.
 - Fontes oficiais permanecem em `dados_brutos/` e não devem ser alteradas.
 - A unidade de integração entre arquivos temáticos é exclusivamente `CO_CURSO`, após agregação e validação de unicidade.
@@ -18,12 +19,12 @@
 - Fase 6 (`250b066`): loader de Conceito Enade por edição, com tabela original, proveniência, `SC` separado da faixa numérica e validações de schema.
 - Fase 7 (`992dbff`): primeira implementação da CLI genérica por edição/área e da orquestração que caracteriza o `arq1`, reconcilia o Conceito e combina somente tabelas agregadas one-to-one por `CO_CURSO`.
 - Fase 8 (`e75142f`, com correções consolidadas em `31ad957` — `fix(fase-8): valida evidencias e publica artefatos com rollback`): pacote `evidencias.json` schema `2.0`, validação semântica integral, participação oficial separada dos microdados, proveniência dos TXT utilizados, suporte ZIP/diretório e publicação conjunta com staging e rollback. O commit corretivo é ancestral do ponto de partida atual. Auditoria detalhada em `AUDITORIA_FASE_8.md`.
-- Fase 9A: implementação local corrigida e validada, aguardando revisão/aceite; adiciona grupos comparativos, benchmarks, estimandos, efeitos, incerteza, associações ecológicas e pacote de evidências schema `3.0`. Ainda não foi commitada nem enviada ao remoto. A Fase 9B continua planejada e não foi iniciada.
+- Fase 9A (`bd8b45c`): aprovada, validada, versionada e enviada ao branch remoto; adiciona grupos comparativos, benchmarks, estimandos, efeitos, incerteza, associações ecológicas e pacote de evidências schema `3.0`. A Fase 9B continua planejada e não foi iniciada.
 
 ## Trabalho realizado recentemente
 
 - As correções da Fase 8 foram versionadas no commit `31ad957`; não existem mais apenas como alterações locais sem commit.
-- O trabalho desta tarefa foi feito em `feature/pipeline-multiedicao`, sobre o commit-base `b93a020be1a27e2ac7a8e69c9b9046623e1889a8`. As alterações da Fase 9A permanecem locais para revisão.
+- O trabalho da Fase 9A foi feito em `feature/pipeline-multiedicao`, sobre o commit-base `b93a020be1a27e2ac7a8e69c9b9046623e1889a8`, e consolidado no commit `bd8b45cbd6ad444d2a714028c6642002a6af216b`.
 - A especificação metodológica aprovada foi registrada em `PLANO_EVOLUCAO_PIPELINE_com_entrega_biologia` e `METODOLOGIA.md` antes da implementação.
 
 ## Estado validado
@@ -45,7 +46,7 @@
 
 ## Próximo passo recomendado
 
-Revisar o resultado local validado da Fase 9A e, se aprovado, autorizar seu commit/push antes de qualquer trabalho na Fase 9B. A Fase 9B será o motor de alertas mecânicos apoiado nesses resultados e permanece fora desta tarefa. A Fase 10 continua sendo o teste end-to-end permanente. O piloto tem Conceito 3; não fabricar Grupo A de Conceito 1.
+Aguardar autorização específica antes de iniciar a Fase 9B. Ela será o motor de alertas mecânicos apoiado nos resultados versionados da Fase 9A e permanece fora desta tarefa. A Fase 10 continua sendo o teste end-to-end permanente. O piloto tem Conceito 3; não fabricar Grupo A de Conceito 1.
 
 ## Decisões e pendências operacionais
 
