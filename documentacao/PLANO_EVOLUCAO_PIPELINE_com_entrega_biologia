@@ -229,7 +229,7 @@ Manter a fonte original disponível para auditoria.
 
 ## 11. Fase 7 — pipeline genérico de área
 
-**Orquestração descritiva implementada.** A CLI por edição/slug e fontes explícitas caracteriza cursos pelo `arq1`, reconcilia a planilha de Conceito e combina somente agregados one-to-one de desempenho, indicadores gerais e processo formativo. Os CSVs de validação e análise ficam separados. A Fase 8 acrescenta o pacote de evidências; comparações e benchmarks ficam para a Fase 9A. A saída ainda não é o relatório final.
+**Orquestração descritiva implementada.** A CLI por edição/slug e fontes explícitas caracteriza cursos pelo `arq1`, reconcilia a planilha de Conceito e combina somente agregados one-to-one de desempenho, indicadores gerais e processo formativo. Os CSVs de validação e análise ficam separados. A Fase 8 acrescenta o pacote de evidências; a Fase 9A acrescenta comparações, benchmarks, efeitos e incerteza ao pacote schema `3.0`. A saída ainda não é o relatório final.
 
 Depois que os adapters estiverem estáveis, criar uma orquestração genérica.
 
@@ -267,11 +267,106 @@ Não permitir números hardcoded em geradores de relatório quando eles já exis
 
 ## 13. Fase 9 — pré-requisitos analíticos e motor de alertas
 
-**Planejada, não iniciada.** A divisão explicita dependências antes implícitas entre a orquestração e os alertas.
+**Fase 9A validada localmente e aguardando revisão/aceite; Fase 9B planejada e não iniciada.** A divisão explicita dependências antes implícitas entre a orquestração e os alertas.
 
 ### Fase 9A — contraste focal, benchmarks e efeitos/incerteza
 
-Formalizar a pergunta e o contraste focal; definir universos amplo e comparável, critérios de inclusão/exclusão, pesos, N válidos, estimandos, medidas de efeito e incerteza. Integrar essas estruturas somente após contratos e testes próprios. O piloto de 2017 possui Conceito 3: não fabricar Grupo A de Conceito 1. Dimensões do processo continuam dependentes da matriz teórica.
+**Especificação metodológica aprovada; implementação local corrigida e ainda sujeita ao aceite final.** A unidade integrada é `CO_CURSO`. Cada tema é agregado por curso antes de junções one-to-one. Análises individuais só podem combinar variáveis que estejam no mesmo arquivo oficial. Contrastes entre temas são ecológicos, no nível do curso; não se inferem relações entre estudantes a partir de agregados. O processo formativo permanece por item até existir matriz teórica validada.
+
+A implementação está organizada em `contratos_fase_9a`, `definir_grupos`, `benchmarks_fase_9a`, `estimandos_fase_9a`, `incerteza_fase_9a`, `associacoes_ecologicas`, `pipeline_fase_9a` e `validar_fase_9a`. A orquestração publica os nove artefatos tabulares/metadados e `evidencias.json` schema `3.0`; a validação histórica schema `2.0` continua disponível. O piloto de 2017 configura explicitamente `CO_CURSO=12027` como foco e preserva sua classificação no Grupo B. A versão inicial restringe correlações à família `geral_mean` versus demais indicadores elegíveis, registrada em metadados. Estimativas ponderadas são saídas secundárias identificadas; correlação ponderada não foi implementada.
+
+A implementação local passou pela suíte integral, Ruff, recálculos independentes e execuções end-to-end de 2017 e 2025. O aceite final ainda depende da revisão do resultado local e de autorização para versioná-lo. A Fase 9B não foi iniciada.
+
+#### Foco e classificação exclusiva
+
+`eh_focal` é uma camada independente da classificação territorial/institucional A–E. A configuração da área identifica a IES focal e as ofertas focais. Para o piloto Enade 2017, `CO_CURSO=12027` é o foco configurado, com Conceito 3 e classificação institucional B. A oferta focal preserva essa classificação, mas é excluída de qualquer benchmark em que ela própria seja o alvo.
+
+Os grupos exclusivos são:
+
+- **A** — ofertas da IES focal com Conceito Enade numérico 1;
+- **B** — demais ofertas da IES focal na mesma área com conceito numérico superior a 1;
+- **C** — ofertas de outras IES no Pará;
+- **D** — ofertas de outras IES na Região Norte, excluído o Pará;
+- **E** — ofertas de outras IES fora da Região Norte.
+
+`SC`, conceito ausente ou inválido nunca equivale a 1. Oferta da IES focal sem conceito numérico recebe `SEM_GRUPO`. Oferta não focal sem conceito permanece em C, D ou E quando o indicador analisado não exige conceito. Quando A não existir, ele permanece vazio; nenhum Grupo A sintético é criado. O contraste configurado da oferta focal continua disponível. Referências territoriais amplas (Pará, Norte e Brasil) podem se sobrepor e não são braços independentes de testes.
+
+#### Benchmarks
+
+O benchmark amplo contém todos os cursos válidos da mesma área no território de referência, excluindo o alvo. Serão produzidos separadamente para Pará, Região Norte e Brasil; seus universos não serão confundidos com os grupos exclusivos C–E.
+
+O benchmark comparável exige a mesma modalidade e usa, na primeira tentativa, a mesma categoria administrativa, organização acadêmica e faixa de porte. Porte é medido por participantes oficiais. A ordem determinística de relaxamento é:
+
+1. modalidade, categoria administrativa e organização acadêmica iguais; porte de `0,75x` a `1,25x` do alvo;
+2. mesma modalidade, categoria administrativa e organização acadêmica; porte de `0,5x` a `2,0x`;
+3. mesma modalidade e categoria administrativa; porte de `0,5x` a `2,0x`;
+4. mesma modalidade; porte de `0,5x` a `2,0x`.
+
+Modalidade nunca é relaxada. Território nunca é ampliado silenciosamente. Cada nível tentado, regra, membros e N será preservado para auditoria; seleciona-se o primeiro nível com N suficiente. Os níveis posteriores também podem ser calculados como sensibilidade, sempre identificados. Se o porte do alvo estiver ausente ou não for positivo, o benchmark comparável não é selecionado por essa cascata; a insuficiência é registrada, sem remover o critério silenciosamente. Benchmarks são controles descritivos de heterogeneidade observável, não pareamento causal.
+
+N é contado por indicador após aplicar a elegibilidade. A política operacional versionada `fase_9a_n_v1` é:
+
+- `N >= 10`: contraste completo e IC ecológico permitido;
+- `5 <= N < 10`: resultado exploratório/descritivo, sem IC como evidência principal;
+- `N < 5`: insuficiente para síntese; preservar membros e auditoria, sem estimativa agregada interpretável.
+
+Esses limiares são política operacional do projeto, não regra estatística universal. Se nenhum nível alcançar 10, reporta-se o estado do melhor nível aplicável; nunca se escolhe nível com base no resultado observado.
+
+#### Elegibilidade e ausências por indicador
+
+Para cada curso e indicador, registrar `n_total`, `n_valido`, cobertura válida (`n_valido/n_total`, nula se o denominador for zero), ausências, invalidades, exclusões e motivo. Aplicar estados:
+
+- cobertura válida `< 50%`: `insuficiente_cobertura`;
+- cobertura válida `>= 50%` e `n_valido < 10`: `baixo_n`;
+- cobertura válida `>= 50%` e `n_valido >= 10`: `elegivel`.
+
+Valores `baixo_n` permanecem nas tabelas e descrições auditáveis, mas não entram em estimandos ou IC que exijam o N mínimo. Exclusões globais por curso/indicador têm chave única; exclusões focais informam `CO_CURSO_ALVO`, e exclusões de pares informam a associação e ambos os indicadores. Todas registram estado, denominadores e motivo. Ausência nunca é zero, resposta negativa ou Conceito 1. O denominador válido pertence à regra do indicador; inscritos e participantes oficiais não o substituem.
+
+#### Estimandos e pesos
+
+O estimando primário é o **curso típico**, com peso 1 por curso elegível. Para benchmark `B` com valores `x_i`, a média não ponderada é `mean_B = sum(x_i)/N_B`; para foco único `F`, `dif_media = x_F - mean_B`, `dif_mediana = x_F - median(x_i)`, `percentil_F = 100 * (n(x_i < x_F) + 0,5*n(x_i = x_F))/N_B` e `z_ref = (x_F - mean_B)/sd_amostral_B`. `z_ref` é distância padronizada da referência, nunca Hedges g. Para múltiplos focais, o valor focal primário é a média não ponderada entre ofertas focais elegíveis; registrar membros, N e motivos de exclusão. O benchmark amplo multifoco exclui todos os focos e o comparável é a união deduplicada dos comparáveis individuais selecionados.
+
+Estimativas secundárias do **participante/respondente típico** usam o denominador válido específico do indicador como peso: `mean_w = sum(n_valido_i*x_i)/sum(n_valido_i)`. Para proporções, `p_curso` é a proporção de cada curso; diferença primária é `p_F - mean(p_B)`, e a análise agrupada `sum(sucessos_i)/sum(n_valido_i)` é secundária e explicitamente identificada. Razão de proporções `p_F/p_B` é secundária e só existe para denominador de referência positivo; não será chamada risco relativo sem interpretação temporal apropriada. Nunca substituir a análise não ponderada pela ponderada.
+
+Para variáveis contínuas ou ordinais agregadas, apresentar diferenças absolutas e para a mediana; percentil e `z_ref` quando o foco for único. Hedges g só se aplica à comparação de dois grupos de cursos com N e variância adequados: `g = J*(mean_F-mean_B)/sd_pooled`, `J = 1 - 3/(4*(n_F+n_B)-9)`. É indefinido para braço com menos de dois cursos ou variância combinada nula. Cliff's delta só será usado quando a escala e o contraste justificarem a probabilidade de superioridade; não será calculado automaticamente para todo indicador. Para proporções, a diferença é principal e a razão secundária.
+
+#### Incerteza e outliers
+
+Quando o limiar de N permitir, calcular IC de 95% por bootstrap percentil com 5.000 reamostragens no nível do curso. A seed-base versionada é `20250901`; a seed por contraste é derivada deterministicamente do identificador estável do contraste. Reamostragens são reproduzíveis e preservam o curso como unidade.
+
+Com foco único, o valor focal permanece fixo e só o benchmark é reamostrado. Com ao menos dois focos elegíveis, focos e benchmark são reamostrados separadamente por `CO_CURSO`; com apenas um, aplica-se o contrato condicional. Antes de formar arrays, cada braço é ordenado estavelmente por `CO_CURSO`, de modo que a ordem de entrada não altere os ICs. O intervalo registra `tipo_incerteza`, `unidade_reamostragem`, `foco_reamostrado`, `numero_reamostragens` e `seed`. Não produzir IC quando N for insuficiente, indicador focal ausente, variância/estimativa indefinida ou menos de 95% das reamostragens forem válidas. Incerteza individual dentro do curso e variação ecológica entre cursos são conceitos separados.
+
+Sinalizar outliers pelo critério exploratório de `1,5 × IQR`; manter todos na análise principal. Publicar sensibilidade sem os cursos sinalizados somente quando o N resultante continuar suficiente, identificando a exclusão e preservando o resultado principal.
+
+#### Correlações ecológicas
+
+Correlacionar indicadores agregados por curso por Spearman não ponderado. Aplicar primeiro a elegibilidade separada dos dois indicadores e somente então formar pares completos entre cursos elegíveis em ambos. Registrar N estrutural, N elegível, N de pares completos e exclusões por associação. A política operacional inicial exige N mínimo de 20 e ao menos cinco valores distintos em cada variável. Tentativas com N insuficiente permanecem publicadas com status e motivo, sem `rho`. Não calcular com variável constante. Bootstrap de cursos usa as regras de seed e reamostragens acima quando aplicável. Sinalizar outliers por `1,5 × IQR`, sem remoção principal; sensibilidade sem sinalizados só com N suficiente. Toda correlação será rotulada ecológica, sem inferência individual ou causal.
+
+Correlação ponderada não é requisito da primeira implementação. Só poderá ser adicionada com definição matemática explícita, contrato, testes e documentação próprios; não presumir uma definição de Spearman ponderado.
+
+Para limitar a família exploratória inicial e sua multiplicidade, a primeira versão pré-especifica associações de `geral_mean` com cada outro indicador elegível. A lista efetivamente tentada é gravada nos metadados e na tabela de associações. Relações cujos dois lados derivam diretamente da família de desempenho recebem `tipo_associacao=mecanica_desempenho` e não devem ser promovidas a achado substantivo. As demais ficam explicitamente classificadas. Ampliação para outras famílias de pares exige justificativa/documentação e análise de multiplicidade própria.
+
+#### Contratos e artefatos
+
+A Fase 9A produz, sem duplicar informação além do necessário e com chaves que recomponham cada análise:
+
+- `grupos_comparativos.csv`;
+- `benchmarks_definicoes.csv` e `benchmarks_membros.csv`;
+- `contrastes.csv` e `efeitos.csv`;
+- `incerteza.csv`;
+- `associacoes_ecologicas.csv`;
+- `exclusoes_fase_9a.csv`;
+- `metadados_fase_9a.json`.
+
+Os contratos documentam edição, área, foco, indicador, unidade, território, grupos/membros, critérios tentados e selecionados, versão da política, N de cursos, denominadores, elegibilidade, estimando, pesos, fórmula/versão, efeito, IC/método, outliers, seed e proveniência. Estados sem estimativa são explícitos, com motivo; não se serializa ausência como zero.
+
+O schema de evidências evoluirá contratualmente de `2.0` para `3.0`. A validação será condicionada à versão: artefatos históricos `2.0` continuam validáveis pelo contrato antigo; `3.0` valida os blocos implementados da Fase 9A. Não haverá migração ou conversão silenciosa. Os blocos de alertas e achados permanecem indisponíveis/vazios até a Fase 9B.
+
+#### Validações e aceite da Fase 9A
+
+Testes devem cobrir: exclusividade A–E e `SEM_GRUPO`; não sobreposição dos grupos territoriais exclusivos; ausência/SC; A vazio; contraste focal sem A; piloto `CO_CURSO=12027` preservado em B mas removido do benchmark quando alvo; cascata e território sem expansão silenciosa; estados de elegibilidade e denominadores; N mínimo e insuficiência; coerência de pesos; casos de variância zero; proporções e razões; sensibilidade de outliers; determinismo do bootstrap; correlação com N insuficiente/variável constante; contratos JSON/CSV; validação histórica 2.0 e nova 3.0; compatibilidade real 2017/2025 e equivalência ZIP/diretório.
+
+A Fase 9A será considerada aceita após revisão do pacote desta implementação, validação dos artefatos e proveniência reproduzíveis, testes unitários/integrados/end-to-end e Ruff verdes em 2017 e 2025, e documentação das limitações e políticas. A Fase 9B permanece separada e não faz parte desse aceite.
 
 ### Fase 9B — motor de alertas mecânicos
 

@@ -36,6 +36,7 @@ class ResultadoArea:
     proveniencia_processo: pd.DataFrame | None = None
     distribuicoes_questionario: pd.DataFrame | None = None
     regras_indicadores: pd.DataFrame | None = None
+    artefatos_fase_9a: dict[str, pd.DataFrame | dict] | None = None
 
 
 def caracterizar_cursos(
@@ -193,4 +194,16 @@ def salvar_resultado_area(resultado: ResultadoArea, pasta: Path) -> list[Path]:
             destino = pasta / f"{nome}.csv"
             tabela.to_csv(destino, index=False, sep=";", encoding="utf-8-sig")
             arquivos.append(destino)
+    for nome, tabela in (resultado.artefatos_fase_9a or {}).items():
+        destino = pasta / nome
+        if isinstance(tabela, pd.DataFrame):
+            tabela.to_csv(destino, index=False, sep=";", encoding="utf-8-sig")
+        else:
+            import json
+
+            destino.write_text(
+                json.dumps(tabela, ensure_ascii=False, indent=2, allow_nan=False) + "\n",
+                encoding="utf-8",
+            )
+        arquivos.append(destino)
     return arquivos

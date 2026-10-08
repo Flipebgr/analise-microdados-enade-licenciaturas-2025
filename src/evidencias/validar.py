@@ -7,12 +7,14 @@ import re
 from src.edicoes.base import normalizar_conceito
 from src.evidencias.proveniencia import fontes_utilizadas
 
-SCHEMA_VERSION = "2.0"
-BLOCOS = {
+SCHEMA_VERSION = "3.0"
+SCHEMA_VERSION_HISTORICO = "2.0"
+BLOCOS_V2 = {
     "schema_version", "edicao", "area", "universo", "ofertas_focais", "participacao",
     "desempenho", "perfil", "trajetoria", "processo_formativo", "benchmarks", "efeitos",
     "associacoes_ecologicas", "qualidade", "alertas", "achados_priorizados", "proveniencia",
 }
+BLOCOS = {*BLOCOS_V2, "fase_9a"}
 
 
 def _exigir(condicao: bool, mensagem: str) -> None:
@@ -20,10 +22,14 @@ def _exigir(condicao: bool, mensagem: str) -> None:
         raise ValueError(mensagem)
 
 
-def _campos(objeto: dict, campos) -> None:
+def _campos(objeto: dict, campos, *, exatos: bool = False) -> None:
     _exigir(isinstance(objeto, dict), "Objeto do schema deve ser um dicionário")
-    faltantes = set(campos) - objeto.keys()
+    esperados = set(campos)
+    faltantes = esperados - objeto.keys()
     _exigir(not faltantes, f"Campos obrigatórios ausentes: {faltantes}")
+    if exatos:
+        extras = objeto.keys() - esperados
+        _exigir(not extras, f"Campos incompatíveis com a versão do schema: {extras}")
 
 
 def _contagem(valor, nome: str, *, nulo=False) -> None:
@@ -174,8 +180,13 @@ def _perfil(pacote, cursos):
 
 
 def _validar(p):
-    _campos(p, BLOCOS)
-    _exigir(p["schema_version"] == SCHEMA_VERSION, "Versão do schema incompatível; regenere as evidências")
+    versao = p.get("schema_version")
+    if versao == SCHEMA_VERSION_HISTORICO:
+        _campos(p, BLOCOS_V2, exatos=True)
+    elif versao == SCHEMA_VERSION:
+        _campos(p, BLOCOS, exatos=True)
+    else:
+        raise ValueError("Versão do schema de evidências não suportada")
     _finitos(p)
     _campos(p["edicao"], ("ano", "nome", "capacidades", "itens_processo", "escala_processo"))
     _campos(p["area"], ("slug", "nome", "co_grupo", "co_ies_focal", "grau", "aplicabilidade"))
@@ -196,6 +207,10 @@ def _validar(p):
     cursos = set(cursos)
     _exigir(len(universo["cursos_focais"]) == len(set(universo["cursos_focais"]))
             and set(universo["cursos_focais"]) <= cursos, "Universo focal inválido")
+    configurados = set(map(str, p["area"].get("co_cursos_focais", ())))
+    if configurados:
+        _exigir(set(universo["cursos_focais"]) == configurados,
+                "Universo focal diverge dos cursos configurados")
     cobertura = universo["cobertura_por_curso"]
     # A auditoria pode incluir cursos somente da planilha, fora da base ancorada nos microdados.
     _linhas(cobertura, {r["CO_CURSO"] for r in cobertura})
@@ -261,14 +276,27 @@ def _validar(p):
             focal = focais.get((r["CO_CURSO"],))
             if focal:
                 _exigir(all(focal[c] == v for c, v in r.items()), "Oferta focal diverge dos indicadores")
-    for nome in ("trajetoria", "benchmarks", "efeitos", "associacoes_ecologicas"):
-        _campos(p[nome], ("disponivel", "motivo"))
-        _exigir(p[nome]["disponivel"] is False and bool(p[nome]["motivo"]), f"{nome} ainda sem contrato implementado")
+    _campos(p["trajetoria"], ("disponivel", "motivo"))
+    _exigir(p["trajetoria"]["disponivel"] is False and bool(p["trajetoria"]["motivo"]),
+            "trajetoria ainda sem contrato implementado")
+    if versao == SCHEMA_VERSION_HISTORICO:
+        for nome in ("benchmarks", "efeitos", "associacoes_ecologicas"):
+            _campos(p[nome], ("disponivel", "motivo"))
+            _exigir(p[nome]["disponivel"] is False and bool(p[nome]["motivo"]),
+                    f"{nome} incompatível com o schema histórico 2.0")
+    else:
+        _validar_fase_9a(p)
     _exigir(p["alertas"] == [] and p["achados_priorizados"] == [], "Alertas/achados ainda não implementados")
     _exigir(p["qualidade"] == {"base_por_curso_unica": True}, "Qualidade incompatível")
     _campos(p["proveniencia"], ("fontes", "tabelas_auditaveis"))
     tabelas = {"base_cursos.csv", "auditoria_cobertura.csv", "proveniencia_conceito.csv",
                "distribuicoes_questionario.csv", "regras_indicadores.csv"}
+    if versao == SCHEMA_VERSION:
+        tabelas |= {
+            "grupos_comparativos.csv", "benchmarks_definicoes.csv", "benchmarks_membros.csv",
+            "contrastes.csv", "efeitos.csv", "incerteza.csv", "associacoes_ecologicas.csv",
+            "exclusoes_fase_9a.csv", "metadados_fase_9a.json",
+        }
     if p["processo_formativo"]["disponivel"]:
         tabelas |= {"processo_itens.csv", "proveniencia_processo.csv"}
     _exigir(len(p["proveniencia"]["tabelas_auditaveis"]) == len(tabelas)
@@ -290,6 +318,58 @@ def _validar(p):
         _campos(r, ("edicao", "fonte", "sha256", "aba", "n_linhas_fonte", "n_linhas_nao_dados", "n_ofertas"))
         _exigir(r["edicao"] == p["edicao"]["ano"] and re.fullmatch("[0-9a-f]{64}", r["sha256"]) is not None,
                 "Proveniência de Conceito incompatível")
+
+
+def _validar_fase_9a(p: dict) -> None:
+    fase = p["fase_9a"]
+    _campos(fase, ("contrastes", "exclusoes", "metadados"))
+    metadados = fase["metadados"]
+    _campos(metadados, (
+        "geracao_id", "versao_politica_n", "n_minimo_contraste_completo", "n_minimo_sintese",
+        "n_minimo_correlacao", "cobertura_minima_indicador", "n_minimo_valido_indicador",
+        "seed_base", "numero_reamostragens", "nivel_confianca", "unidade_reamostragem",
+        "cursos_focais", "unidade_analise", "edicao", "area", "politica_elegibilidade",
+        "politica_pares_correlacao", "contrato_multifoco", "associacoes_tentadas",
+    ))
+    _exigir(metadados["versao_politica_n"] == "fase_9a_n_v1", "Política de N não versionada")
+    _exigir(metadados["unidade_analise"] == "CO_CURSO", "Unidade da Fase 9A incompatível")
+    _exigir(metadados["n_minimo_contraste_completo"] == 10
+            and metadados["n_minimo_sintese"] == 5
+            and metadados["n_minimo_correlacao"] == 20,
+            "Limiares operacionais da Fase 9A incompatíveis")
+    _exigir(metadados["seed_base"] == 20250901
+            and metadados["numero_reamostragens"] == 5000
+            and metadados["unidade_reamostragem"] == "CO_CURSO",
+            "Configuração de bootstrap incompatível")
+    _exigir(metadados["edicao"] == p["edicao"]["ano"] and metadados["area"] == p["area"]["slug"],
+            "Metadados da Fase 9A divergem de edição/área")
+    _exigir(isinstance(metadados["geracao_id"], str)
+            and re.fullmatch("[0-9a-f]{64}", metadados["geracao_id"]) is not None,
+            "Identificador de geração inválido")
+    _exigir(metadados["cursos_focais"] == sorted(p["universo"]["cursos_focais"]),
+            "Focos da Fase 9A divergem do universo")
+    _exigir(metadados["contrato_multifoco"] == "media_nao_ponderada_focos_elegiveis:v1",
+            "Contrato multifoco incompatível")
+    for nome, chaves in (
+        ("benchmarks", ("disponivel", "motivo", "definicoes", "membros")),
+        ("efeitos", ("disponivel", "motivo", "resultados")),
+        ("associacoes_ecologicas", ("disponivel", "motivo", "resultados")),
+    ):
+        _campos(p[nome], chaves)
+        _exigir(p[nome]["disponivel"] is True and p[nome]["motivo"] is None,
+                f"Bloco {nome} deve declarar o contrato 3.0 disponível")
+    referencias = (
+        (p["benchmarks"]["definicoes"], "benchmarks_definicoes.csv"),
+        (p["benchmarks"]["membros"], "benchmarks_membros.csv"),
+        (p["efeitos"]["resultados"], "efeitos.csv"),
+        (p["associacoes_ecologicas"]["resultados"], "associacoes_ecologicas.csv"),
+        (fase["contrastes"], "contrastes.csv"),
+        (fase["exclusoes"], "exclusoes_fase_9a.csv"),
+    )
+    for referencia, arquivo in referencias:
+        _campos(referencia, ("arquivo", "n_registros"))
+        _exigir(referencia["arquivo"] == arquivo, f"Referência de artefato inválida: {arquivo}")
+        _contagem(referencia["n_registros"], f"{arquivo}.n_registros")
 
 
 def validar_evidencias(pacote: dict) -> None:

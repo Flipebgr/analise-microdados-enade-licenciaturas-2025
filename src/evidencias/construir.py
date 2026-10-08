@@ -7,6 +7,7 @@ from typing import Any
 
 import pandas as pd
 
+from src.analise.pipeline_fase_9a import construir_fase_9a
 from src.core.configuracao_area import ConfiguracaoArea, validar_compatibilidade_area
 from src.core.juncoes import validar_unicidade_por_curso
 from src.edicoes.base import ContratoEdicao
@@ -47,6 +48,64 @@ def _cobertura(auditoria: pd.DataFrame) -> dict[str, int]:
     return resultado
 
 
+def _proveniencia_indicadores(
+    resultado: ResultadoArea,
+    edicao: ContratoEdicao,
+) -> dict[str, dict[str, Any]]:
+    """Explicita a linhagem oficial consumida pelos artefatos da Fase 9A."""
+
+    origens: dict[str, dict[str, Any]] = {}
+    for componente, variavel in edicao.desempenho.mapa_canonico.items():
+        indicador = f"{componente}_mean"
+        origens[indicador] = {
+            "edicao_origem": edicao.ano,
+            "arquivo_fonte": arquivo_das_variaveis(edicao, (variavel,)),
+            "variavel_oficial": variavel,
+            "indicador_derivado": indicador,
+            "regra_agregacao": "media_dos_presentes_validos_por_curso",
+            "unidade_indicador": "CO_CURSO",
+            "denominador_indicador": f"{componente}_n_valido",
+            "familia_indicador": "desempenho",
+        }
+    regras_indicadores = (
+        resultado.regras_indicadores
+        if resultado.regras_indicadores is not None else pd.DataFrame()
+    )
+    for regra in regras_indicadores.to_dict("records"):
+        indicador = regra["indicador"]
+        origens[indicador] = {
+            "edicao_origem": regra["edicao"],
+            "arquivo_fonte": regra["arquivo"],
+            "variavel_oficial": regra["item"],
+            "indicador_derivado": indicador,
+            "regra_agregacao": "proporcao_de_respostas_positivas_por_curso",
+            "unidade_indicador": "CO_CURSO",
+            "denominador_indicador": regra["denominador"],
+            "familia_indicador": "perfil_socioeconomico",
+        }
+    proveniencia_processo = (
+        resultado.proveniencia_processo
+        if resultado.proveniencia_processo is not None else pd.DataFrame()
+    )
+    for regra in proveniencia_processo.to_dict("records"):
+        for sufixo, agregacao in (
+            ("media", "media_das_respostas_validas_por_curso"),
+            ("concordancia_pct", "proporcao_de_concordancia_por_curso"),
+        ):
+            indicador = f"processo:{regra['item']}:{sufixo}"
+            origens[indicador] = {
+                "edicao_origem": regra["edicao"],
+                "arquivo_fonte": regra["arquivo"],
+                "variavel_oficial": regra["item"],
+                "indicador_derivado": indicador,
+                "regra_agregacao": agregacao,
+                "unidade_indicador": "CO_CURSO",
+                "denominador_indicador": "n_valido",
+                "familia_indicador": "processo_formativo",
+            }
+    return origens
+
+
 def construir_evidencias(
     resultado: ResultadoArea,
     edicao: ContratoEdicao,
@@ -79,6 +138,14 @@ def construir_evidencias(
     if not base["CO_GRUPO"].eq(str(area.co_grupo)).all():
         raise ValueError("A base não corresponde ao CO_GRUPO informado")
 
+    resultado_fase_9a = construir_fase_9a(
+        base,
+        area,
+        resultado.processo_itens,
+        proveniencia_indicadores=_proveniencia_indicadores(resultado, edicao),
+    )
+    resultado.artefatos_fase_9a = resultado_fase_9a["artefatos"]
+
     indicadores = resultado.regras_indicadores["indicador"].tolist()
     colunas_perfil = ["CO_CURSO"]
     for indicador in indicadores:
@@ -97,7 +164,10 @@ def construir_evidencias(
         "SITUACAO_CONCEITO", *colunas_desempenho[1:], *colunas_perfil[1:],
     ]))
     colunas_focal = [coluna for coluna in colunas_focal if coluna in base]
-    ofertas_focais = base.loc[base["CO_IES"].eq(str(area.co_ies_focal)), colunas_focal]
+    cursos_focais = set(resultado_fase_9a["metadados"]["cursos_focais"])
+    ofertas_focais = base.loc[base["CO_CURSO"].isin(cursos_focais), colunas_focal].sort_values(
+        "CO_CURSO", kind="stable"
+    )
 
     pacote: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
@@ -115,6 +185,7 @@ def construir_evidencias(
             "co_ies_focal": area.co_ies_focal,
             "grau": area.grau,
             "aplicabilidade": asdict(area.aplicabilidade),
+            "co_cursos_focais": list(area.co_cursos_focais),
         },
         "universo": {
             "n_cursos_base": len(base),
@@ -148,9 +219,45 @@ def construir_evidencias(
             "proveniencia": _registros(resultado.proveniencia_processo) if aplica_processo else [],
             "unidade": "CO_CURSO e item; códigos 7 e 8 não integram a escala analítica.",
         },
-        "benchmarks": {"disponivel": False, "motivo": "Contrato de contraste focal pendente."},
-        "efeitos": {"disponivel": False, "motivo": "Depende de benchmarks validados."},
-        "associacoes_ecologicas": {"disponivel": False, "motivo": "Não especificadas para esta fase."},
+        "benchmarks": {
+            "disponivel": True,
+            "motivo": None,
+            "definicoes": {
+                "arquivo": "benchmarks_definicoes.csv",
+                "n_registros": len(resultado.artefatos_fase_9a["benchmarks_definicoes.csv"]),
+            },
+            "membros": {
+                "arquivo": "benchmarks_membros.csv",
+                "n_registros": len(resultado.artefatos_fase_9a["benchmarks_membros.csv"]),
+            },
+        },
+        "efeitos": {
+            "disponivel": True,
+            "motivo": None,
+            "resultados": {
+                "arquivo": "efeitos.csv",
+                "n_registros": len(resultado.artefatos_fase_9a["efeitos.csv"]),
+            },
+        },
+        "associacoes_ecologicas": {
+            "disponivel": True,
+            "motivo": None,
+            "resultados": {
+                "arquivo": "associacoes_ecologicas.csv",
+                "n_registros": len(resultado.artefatos_fase_9a["associacoes_ecologicas.csv"]),
+            },
+        },
+        "fase_9a": {
+            "contrastes": {
+                "arquivo": "contrastes.csv",
+                "n_registros": len(resultado.artefatos_fase_9a["contrastes.csv"]),
+            },
+            "exclusoes": {
+                "arquivo": "exclusoes_fase_9a.csv",
+                "n_registros": len(resultado.artefatos_fase_9a["exclusoes_fase_9a.csv"]),
+            },
+            "metadados": resultado_fase_9a["metadados"],
+        },
         "qualidade": {"base_por_curso_unica": True},
         "alertas": [],
         "achados_priorizados": [],
@@ -162,6 +269,8 @@ def construir_evidencias(
                 "base_cursos.csv", "auditoria_cobertura.csv", "proveniencia_conceito.csv",
                 "processo_itens.csv", "proveniencia_processo.csv",
                 "distribuicoes_questionario.csv", "regras_indicadores.csv",
+                *[nome for nome in resultado.artefatos_fase_9a if nome.endswith(".csv")],
+                "metadados_fase_9a.json",
             ],
         },
     }

@@ -106,12 +106,14 @@ Infraestrutura compartilhada para:
 ### Outros componentes
 
 - `src/orquestracao/area.py`: caracteriza, reconcilia fontes e junta somente agregados por curso;
-- `src/evidencias/construir.py`: projeta os agregados no pacote schema `2.0`, sem inferência substantiva;
-- `src/evidencias/validar.py`: schema obrigatório, integridade referencial, unicidade, denominadores, aplicabilidade e coerência entre blocos;
+- `src/analise/pipeline_fase_9a.py`: produz grupos, benchmarks, contrastes, efeitos, incerteza e associações ecológicas no nível de `CO_CURSO`;
+- `src/validacao/validar_fase_9a.py`: reconcilia semanticamente chaves, membros, N, critérios, exclusões, referências e identidade da geração entre os artefatos;
+- `src/evidencias/construir.py`: projeta os agregados no pacote schema `3.0` e liga os artefatos analíticos à proveniência oficial;
+- `src/evidencias/validar.py`: valida estritamente os schemas históricos `2.0` e atual `3.0`, além de integridade referencial, unicidade, denominadores, aplicabilidade e coerência entre blocos;
 - `src/evidencias/proveniencia.py`: resolve origens dos produtos e calcula manifesto determinístico dos TXT usados em ZIP/diretório;
 - `src/evidencias/publicar.py`: staging, verificação cruzada JSON/CSVs, lock de escritor, troca de diretório e rollback; detalhes de recuperação em `EXECUCAO.md`.
 
-Esses módulos não implementam benchmarks, efeitos ou alertas. A Fase 9A definirá os contratos analíticos e a Fase 9B consumirá seus resultados para triagem mecânica; a Fase 10 mantém a regressão end-to-end permanente. O pacote `1.0` precisa ser regenerado para `2.0`, pois a validação passou a exigir o contrato integral.
+Os módulos da Fase 9A implementam benchmarks e efeitos reproduzíveis, mas não geram alertas nem promovem associações a achados substantivos. Relações diretamente derivadas da mesma família de desempenho são marcadas `mecanica_desempenho`; as demais ficam explicitamente classificadas. A Fase 9B consumirá resultados validados para triagem mecânica e permanece separada; a Fase 10 mantém a regressão end-to-end permanente. O pacote `1.0` precisa ser regenerado. Pacotes `2.0` históricos continuam validáveis pelo contrato próprio e não aceitam silenciosamente campos do `3.0`.
 
 - `src/configuracao/`: caminhos e leitura de configuração;
 - `src/extracao/`: extração do ZIP oficial;

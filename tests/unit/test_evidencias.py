@@ -9,8 +9,8 @@ import pytest
 from src.core.configuracao_area import BIOLOGIA_BACHARELADO_2017
 from src.edicoes import ENADE_2017
 from src.evidencias import construir_evidencias, salvar_evidencias, validar_evidencias
+from src.evidencias.validar import BLOCOS, SCHEMA_VERSION_HISTORICO
 from tests.suporte_evidencias import resultado_sintetico
-from src.evidencias.validar import BLOCOS
 
 
 @pytest.fixture(scope="module")
@@ -18,24 +18,59 @@ def analise(tmp_path_factory):
     return resultado_sintetico(tmp_path_factory.mktemp("evidencias"))
 
 
-@pytest.fixture
-def pacote(analise):
+@pytest.fixture(scope="module")
+def pacote_base(analise):
     resultado, fonte, _, _ = analise
     return construir_evidencias(resultado, ENADE_2017, BIOLOGIA_BACHARELADO_2017, fonte)
 
 
+@pytest.fixture
+def pacote(pacote_base):
+    return deepcopy(pacote_base)
+
+
 def test_construtor_preserva_proveniencia_e_regras_de_codigos_especiais(pacote):
 
-    assert pacote["schema_version"] == "2.0"
+    assert pacote["schema_version"] == "3.0"
     assert pacote["universo"]["n_cursos_base"] == 2
-    assert pacote["ofertas_focais"][0]["CO_CURSO"] == "00001"
+    assert pacote["ofertas_focais"][0]["CO_CURSO"] == "12027"
     assert pacote["ofertas_focais"][0]["CONCEITO_ENADE_NUM"] == 3
     assert "primeira_geracao_pct" in {r["indicador"] for r in pacote["perfil"]["regras"]}
     processo = pacote["processo_formativo"]["itens_por_curso"][0]
     assert processo["nao_sabe_responder_pct"] == pytest.approx(0.1)
     assert processo["nao_se_aplica_pct"] == pytest.approx(0.1)
-    assert pacote["benchmarks"]["disponivel"] is False
+    assert pacote["benchmarks"]["disponivel"] is True
     assert pacote["alertas"] == []
+
+
+def test_validador_preserva_contrato_historico_schema_2(pacote):
+    historico = deepcopy(pacote)
+    historico["schema_version"] = SCHEMA_VERSION_HISTORICO
+    historico.pop("fase_9a")
+    historico["benchmarks"] = {"disponivel": False, "motivo": "Não calculado no schema 2.0."}
+    historico["efeitos"] = {"disponivel": False, "motivo": "Não calculado no schema 2.0."}
+    historico["associacoes_ecologicas"] = {
+        "disponivel": False,
+        "motivo": "Não calculado no schema 2.0.",
+    }
+    historico["proveniencia"]["tabelas_auditaveis"] = [
+        nome for nome in historico["proveniencia"]["tabelas_auditaveis"]
+        if nome not in {
+            "grupos_comparativos.csv", "benchmarks_definicoes.csv", "benchmarks_membros.csv",
+            "contrastes.csv", "efeitos.csv", "incerteza.csv", "associacoes_ecologicas.csv",
+            "exclusoes_fase_9a.csv", "metadados_fase_9a.json",
+        }
+    ]
+
+    validar_evidencias(historico)
+
+
+def test_schema_2_rejeita_bloco_exclusivo_do_schema_3(pacote):
+    historico_invalido = deepcopy(pacote)
+    historico_invalido["schema_version"] = SCHEMA_VERSION_HISTORICO
+
+    with pytest.raises(ValueError, match="incompatíveis com a versão"):
+        validar_evidencias(historico_invalido)
 
 
 def test_validador_rejeita_denominador_especial_incorreto(pacote):

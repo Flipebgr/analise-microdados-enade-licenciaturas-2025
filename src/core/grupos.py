@@ -18,6 +18,10 @@ def aplicar_grupos_area(
     """
 
     validar_unicidade_por_curso(cursos, nome=f"catálogo de {configuracao.nome}")
-    resultado = aplicar_grupos(cursos, configuracao.co_ies_focal)
+    resultado = aplicar_grupos(
+        cursos,
+        configuracao.co_ies_focal,
+        configuracao.co_cursos_focais,
+    )
     validar_unicidade_por_curso(resultado, nome=f"catálogo classificado de {configuracao.nome}")
     return resultado

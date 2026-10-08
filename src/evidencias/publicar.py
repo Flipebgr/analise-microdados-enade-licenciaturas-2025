@@ -11,11 +11,14 @@ from pathlib import Path
 from src.evidencias.construir import COLUNAS_PROCESSO, _registros, salvar_evidencias
 from src.evidencias.validar import validar_evidencias
 from src.orquestracao.area import ResultadoArea, salvar_resultado_area
+from src.validacao.validar_fase_9a import validar_artefatos_fase_9a
 
 
 def validar_staging(pasta: Path, resultado: ResultadoArea, pacote: dict) -> None:
     carregado = json.loads((pasta / "evidencias.json").read_text(encoding="utf-8"))
     validar_evidencias(carregado)
+    if pacote["schema_version"] == "3.0":
+        validar_artefatos_fase_9a(resultado.artefatos_fase_9a or {}, pacote)
     if carregado != pacote:
         raise ValueError("JSON gravado diverge das evidências em memória")
     # O JSON também precisa corresponder aos CSVs da mesma geração, não basta
@@ -25,7 +28,12 @@ def validar_staging(pasta: Path, resultado: ResultadoArea, pacote: dict) -> None
         (pacote["participacao"]["por_curso"], base),
         (pacote["desempenho"]["por_curso"], base),
         (pacote["perfil"]["indicadores_por_curso"], base),
-        (pacote["ofertas_focais"], base.loc[base["CO_IES"].eq(str(pacote["area"]["co_ies_focal"]))]),
+        (
+            pacote["ofertas_focais"],
+            base.loc[base["CO_CURSO"].isin(pacote["universo"]["cursos_focais"])].sort_values(
+                "CO_CURSO", kind="stable"
+            ),
+        ),
     ):
         if linhas and linhas != _registros(tabela, tuple(linhas[0])):
             raise ValueError("Evidências divergem da base agregada da geração")
@@ -46,10 +54,18 @@ def validar_staging(pasta: Path, resultado: ResultadoArea, pacote: dict) -> None
     # Compara a representação efetivamente publicada; preserva zeros à esquerda,
     # nulidade e precisão, sem coerções de uma segunda importação CSV.
     for nome in esperados:
-        tabela = getattr(resultado, Path(nome).stem)
-        esperado = tabela.to_csv(index=False, sep=";", lineterminator="\n")
-        if (pasta / nome).read_text(encoding="utf-8-sig") != esperado:
-            raise ValueError(f"CSV gravado diverge do agregado validado: {nome}")
+        if nome in (resultado.artefatos_fase_9a or {}):
+            tabela = resultado.artefatos_fase_9a[nome]
+        else:
+            tabela = getattr(resultado, Path(nome).stem)
+        if isinstance(tabela, dict):
+            esperado = json.dumps(tabela, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
+            gravado = (pasta / nome).read_text(encoding="utf-8")
+        else:
+            esperado = tabela.to_csv(index=False, sep=";", lineterminator="\n")
+            gravado = (pasta / nome).read_text(encoding="utf-8-sig")
+        if gravado != esperado:
+            raise ValueError(f"Artefato gravado diverge do agregado validado: {nome}")
 
 
 def publicar_analise(resultado: ResultadoArea, pacote: dict, destino: Path) -> list[Path]:

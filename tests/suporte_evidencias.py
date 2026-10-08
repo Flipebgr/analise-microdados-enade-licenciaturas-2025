@@ -17,7 +17,8 @@ def fontes_sinteticas(pasta: Path, edicao=ENADE_2017, area=BIOLOGIA_BACHARELADO_
     with ZipFile(zip_path, "w") as zip_file:
         for schema in edicao.arquivos:
             linhas = []
-            for curso, ies in (("00001", str(area.co_ies_focal)), ("00002", "9")):
+            curso_focal = area.co_cursos_focais[0] if area.co_cursos_focais else "00001"
+            for curso, ies in ((curso_focal, str(area.co_ies_focal)), ("00002", "9")):
                 for resposta in ("1", "2", "4", "5", "6", "6", "4", "7", "8", ""):
                     r = {c: "" for c in schema.colunas_obrigatorias}
                     for c in schema.colunas_obrigatorias:
@@ -37,7 +38,8 @@ def fontes_sinteticas(pasta: Path, edicao=ENADE_2017, area=BIOLOGIA_BACHARELADO_
             zip_file.writestr(nome, conteudo)
             (extraidos / nome).write_text(conteudo, encoding="utf-8", newline="")
     conceitos = []
-    for curso, ies, conceito in (("00001", str(area.co_ies_focal), "3"), ("00002", "9", "SC")):
+    curso_focal = area.co_cursos_focais[0] if area.co_cursos_focais else "00001"
+    for curso, ies, conceito in ((curso_focal, str(area.co_ies_focal), "3"), ("00002", "9", "SC")):
         valores = dict(NU_ANO=str(edicao.ano), CO_CURSO=curso, CO_IES=ies,
                        CO_GRUPO=str(area.co_grupo), CO_MUNIC_CURSO="1501402",
                        INSCRITOS="23", PARTICIPANTES="13", CONCEITO_ENADE_ORIGINAL=conceito)

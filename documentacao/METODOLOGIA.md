@@ -55,7 +55,9 @@ Análises individuais podem combinar somente variáveis que estejam no mesmo arq
 
 ## 4. Grupos comparativos exclusivos
 
-Quando existe oferta UFPA com Conceito Enade 1, os grupos independentes são:
+`eh_focal` é uma camada independente da classificação A–E. A configuração da área identifica a IES focal e as ofertas focais; no piloto de 2017, `CO_CURSO=12027` é o foco configurado e tem Conceito Enade 3. A oferta conserva sua classificação institucional B, mas é removida de qualquer benchmark em que seja o próprio alvo.
+
+Os grupos exclusivos são:
 
 - **A** — UFPA com Conceito 1;
 - **B** — demais ofertas da UFPA da mesma área com conceito superior;
@@ -66,6 +68,8 @@ Quando existe oferta UFPA com Conceito Enade 1, os grupos independentes são:
 Pará, Norte e Brasil completos podem ser apresentados como referências descritivas, mas não como grupos independentes em testes quando se sobrepõem.
 
 Quando não existe oferta UFPA Conceito 1, o Grupo A permanece vazio. O projeto usa então um contraste focal ou interno explicitamente documentado, sem criar Conceito 1 artificial.
+
+Ofertas da IES focal sem conceito numérico válido permanecem `SEM_GRUPO`. Ofertas de outras IES sem conceito continuam em C, D ou E quando o indicador não exige Conceito válido. Conceito ausente, `SC` ou inválido nunca é tratado como 1. Pará, Norte e Brasil completos são universos de benchmark descritivo potencialmente sobrepostos; não são tratados como grupos independentes em testes.
 
 ## 5. Benchmarks
 
@@ -87,6 +91,31 @@ Cursos semelhantes em características observáveis, como:
 Um critério recorrente usa participantes entre `0,5x` e `2,0x` do curso-alvo. Análises de sensibilidade podem usar faixas mais estreitas.
 
 Os benchmarks reduzem parte da heterogeneidade observável, mas não constituem pareamento causal.
+
+Na Fase 9A, o benchmark amplo é construído separadamente para Pará, Região Norte e Brasil, incluindo cursos válidos da mesma área e excluindo o curso-alvo. O benchmark comparável usa a seguinte cascata determinística:
+
+1. modalidade, categoria administrativa e organização acadêmica iguais; porte `0,75x–1,25x`;
+2. os mesmos três atributos; porte `0,5x–2,0x`;
+3. modalidade e categoria administrativa iguais; porte `0,5x–2,0x`;
+4. modalidade igual; porte `0,5x–2,0x`.
+
+Modalidade não é relaxada e território não é ampliado silenciosamente. Todos os níveis tentados, critérios e membros são auditáveis. Porte é medido por participantes oficiais; se o porte do alvo não for positivo e disponível, a cascata não seleciona comparáveis. Escolhe-se o primeiro nível com N suficiente, sem usar os valores do indicador para decidir o nível. Os limiares são política operacional versionada do projeto (`fase_9a_n_v1`), não regra estatística universal: N≥10 permite contraste completo e IC ecológico; 5≤N<10 permite resultado exploratório/descritivo sem IC como evidência principal; N<5 é insuficiente para síntese, preservando membros e auditoria.
+
+### Estimandos, pesos e elegibilidade na Fase 9A
+
+Para cada curso/indicador, registrar `n_total`, `n_valido`, ausências, exclusões, validade `n_valido/n_total` e estado. Denominador zero produz validade nula e estado `insuficiente_cobertura`. Os estados são: cobertura válida <50% → `insuficiente_cobertura`; cobertura ≥50% com `n_valido<10` → `baixo_n`; cobertura ≥50% com `n_valido≥10` → `elegivel`. Valores `baixo_n` permanecem auditáveis, mas não integram estimandos ou IC que exijam N mínimo. O denominador é específico da regra do indicador; inscritos/participantes oficiais não o substituem. Ausência não é zero nem resposta negativa.
+
+O estimando principal representa o curso típico: cada curso elegível tem peso 1. Para valores de benchmark `x_i`, `media_B = soma(x_i)/N_B`; com foco único `x_F`, `dif_media=x_F-media_B`, `dif_mediana=x_F-mediana(x_i)`, `percentil_F=100*(n(x_i<x_F)+0,5*n(x_i=x_F))/N_B` e `z_ref=(x_F-media_B)/dp_amostral_B`. `z_ref` é distância padronizada da referência e não Hedges g. Com mais de um foco, o resumo primário do foco é a média não ponderada entre focais elegíveis; membros, N e motivos de exclusão focais são explícitos. O benchmark amplo multifoco exclui todas as ofertas focais. O comparável multifoco é a união deduplicada dos comparáveis individuais selecionados, sem recolocar focos.
+
+Estimativas secundárias representam o participante/respondente típico e ponderam pela contagem válida específica do indicador: `media_pond = soma(n_valido_i*x_i)/soma(n_valido_i)`. Para proporções, a diferença entre proporções não ponderadas por curso é principal; a razão de proporções é secundária quando a proporção de referência é positiva. A proporção agrupada `soma(sucessos)/soma(n_valido)` é apresentada separadamente como estimativa ponderada. Razão de proporções não é chamada risco relativo sem interpretação temporal apropriada. Nunca substituir silenciosamente o estimando de curso típico pelo ponderado.
+
+Hedges g só é calculado entre dois grupos de cursos com N e variância adequados, por `g=J*(media_F-media_B)/dp_pooled`, `J=1-3/(4*(n_F+n_B)-9)`. É indefinido se um braço tiver menos de dois cursos ou a variância combinada for zero. Cliff's delta é reservado a escalas e contrastes cuja interpretação de probabilidade de superioridade seja adequada. Para proporções, diferença de proporções é principal; razão é secundária.
+
+### Incerteza e outliers na Fase 9A
+
+Quando N permitir, usar IC de 95% por bootstrap percentil de 5.000 reamostragens no nível do curso. A seed-base versionada é `20250901`, com seed determinística por identificador de contraste. Com foco único, manter o foco fixo e reamostrar apenas o benchmark. Com ao menos dois focos elegíveis, reamostrar separadamente focos e benchmark por `CO_CURSO`; com apenas um, aplicar o contrato condicional. Ordenar estavelmente cada braço por `CO_CURSO` antes de formar arrays, para que a ordem de entrada não altere resultados. Rotular o tipo de intervalo e registrar `unidade_reamostragem`, `foco_reamostrado`, `numero_reamostragens` e `seed`. Não emitir IC se N for insuficiente, a estimativa for indefinida ou menos de 95% das réplicas forem válidas. Incerteza individual e ecológica são distintas.
+
+Sinalizar outliers pelo critério exploratório `1,5 × IQR`. Não removê-los na análise principal. Publicar análise de sensibilidade sem os sinalizados somente se o N restante continuar suficiente e apresentar ambos os resultados.
 
 ## 6. Participação e desempenho
 
@@ -198,6 +227,10 @@ Indicadores agregados por curso podem ser relacionados por Spearman, com:
 - ponderação por participantes quando metodologicamente pertinente.
 
 Correlação ecológica não representa correlação entre estudantes e não sustenta causalidade.
+
+Na Fase 9A, a análise principal é Spearman não ponderado, com unidade `CO_CURSO`, N obrigatório e mínimo operacional inicial de 20 cursos. Primeiro aplicar elegibilidade separadamente a ambos os indicadores; somente cursos elegíveis nos dois lados podem formar pares completos. Registrar N estrutural, N elegível, pares completos e exclusões por associação. Pares com N insuficiente permanecem publicados com status e motivo, sem `rho`. Exigir pelo menos cinco valores distintos em cada variável; não calcular com N insuficiente ou variável constante. Inspecionar outliers por `1,5 × IQR`, sem removê-los automaticamente; publicar sensibilidade sem sinalizados apenas se N continuar suficiente. Correlação ponderada não é requisito da primeira implementação. Qualquer variante ponderada exigirá definição matemática explícita, contrato, testes e rótulo de associação ecológica ponderada.
+
+A família exploratória inicial relaciona `geral_mean` a cada outro indicador elegível. Os pares tentados são registrados, inclusive quando insuficientes; ampliar a família exige justificativa e análise de multiplicidade próprias. Relações cujos dois lados derivam diretamente da família de desempenho são classificadas como `mecanica_desempenho`, não como achados substantivos. As demais recebem classificação explícita (`exploratoria` ou, quando houver contrato próprio, `substantiva`).
 
 ## 12. Outliers
 

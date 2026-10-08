@@ -26,6 +26,7 @@ class ConfiguracaoArea:
     edicao: int = 2025
     grau: str = "Licenciatura"
     aplicabilidade: AplicabilidadeArea = AplicabilidadeArea()
+    co_cursos_focais: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         slug = self.slug.strip()
@@ -54,6 +55,12 @@ class ConfiguracaoArea:
         object.__setattr__(self, "slug", slug)
         object.__setattr__(self, "nome", nome)
         object.__setattr__(self, "grau", grau)
+        cursos_focais = tuple(str(curso).strip() for curso in self.co_cursos_focais)
+        if any(not curso for curso in cursos_focais):
+            raise ValueError("CO_CURSO focal não pode ser vazio")
+        if len(cursos_focais) != len(set(cursos_focais)):
+            raise ValueError("CO_CURSO focais não podem se repetir")
+        object.__setattr__(self, "co_cursos_focais", cursos_focais)
 
 
 APLICABILIDADE_LICENCIATURAS_2025 = AplicabilidadeArea(
@@ -101,6 +108,7 @@ BIOLOGIA_BACHARELADO_2017 = ConfiguracaoArea(
     1601,
     edicao=2017,
     grau="Bacharelado",
+    co_cursos_focais=("12027",),
     aplicabilidade=AplicabilidadeArea(
         proficiencia=False,
         recomendacao=False,
